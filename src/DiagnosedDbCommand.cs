@@ -1,0 +1,266 @@
+﻿using System;
+using System.ComponentModel;
+using System.Data;
+using System.Data.Common;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace Microsoft.Data.Diagnostics
+{
+    internal class DiagnosedDbCommand : DbCommand
+    {
+        private static readonly DbDiagnosticListener DiagnosticListener = DbDiagnosticListener.Instance;
+
+        private readonly DbCommand _inner;
+
+        public DiagnosedDbCommand(DbCommand inner)
+        {
+            _inner = inner ?? throw new ArgumentNullException(nameof(inner));
+        }
+
+        public override string CommandText
+        {
+            get => _inner.CommandText;
+            set => _inner.CommandText = value;
+        }
+
+        public override int CommandTimeout
+        {
+            get => _inner.CommandTimeout;
+            set => _inner.CommandTimeout = value;
+        }
+
+        public override CommandType CommandType
+        {
+            get => _inner.CommandType;
+            set => _inner.CommandType = value;
+        }
+
+        public override UpdateRowSource UpdatedRowSource
+        {
+            get => _inner.UpdatedRowSource;
+            set => _inner.UpdatedRowSource = value;
+        }
+
+        internal new DiagnosedDbConnection Connection => (DiagnosedDbConnection) _inner.Connection;
+
+        private new DiagnosedDbTransaction Transaction => (DiagnosedDbTransaction) _inner.Transaction;
+
+        protected override DbConnection DbConnection
+        {
+            get => _inner.Connection.AddDiagnosting();
+            set => _inner.Connection = value;
+        }
+
+        protected override DbParameterCollection DbParameterCollection => _inner.Parameters;
+
+        protected override DbTransaction DbTransaction
+        {
+            get => _inner.Transaction.AddDiagnosting();
+            set => _inner.Transaction = value;
+        }
+
+        public override bool DesignTimeVisible
+        {
+            get => _inner.DesignTimeVisible;
+            set => _inner.DesignTimeVisible = value;
+        }
+
+        public override ISite Site
+        {
+            get => _inner.Site;
+            set => _inner.Site = value;
+        }
+
+        public override void Cancel()
+        {
+            _inner.Cancel();
+        }
+
+        public override void Prepare()
+        {
+            _inner.Prepare();
+        }
+
+        public override Task PrepareAsync(CancellationToken cancellationToken = default)
+        {
+            return _inner.PrepareAsync(cancellationToken);
+        }
+
+        protected override DbParameter CreateDbParameter()
+        {
+            return _inner.CreateParameter();
+        }
+
+        public override ValueTask DisposeAsync()
+        {
+            return _inner.DisposeAsync();
+        }
+
+        public override string ToString()
+        {
+            return _inner.ToString();
+        }
+
+        public override object? InitializeLifetimeService()
+        {
+            return _inner.InitializeLifetimeService();
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return ReferenceEquals(this, obj) || _inner.Equals(obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return _inner.GetHashCode();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing) _inner.Dispose();
+        }
+
+        protected override object GetService(Type service)
+        {
+            return _inner.Site.GetService(service);
+        }
+
+        public override async Task<int> ExecuteNonQueryAsync(CancellationToken cancellationToken)
+        {
+            var operationId = DiagnosticListener.WriteCommandBefore(this, Transaction);
+            Exception? e = null;
+            try
+            {
+                return await _inner.ExecuteNonQueryAsync(cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                e = ex;
+                throw;
+            }
+            finally
+            {
+                if (e != null)
+                    DiagnosticListener.WriteCommandError(operationId, this, Transaction, e);
+                else
+                    DiagnosticListener.WriteCommandAfter(operationId, this, Transaction);
+            }
+        }
+
+        public override async Task<object> ExecuteScalarAsync(CancellationToken cancellationToken)
+        {
+            var operationId = DiagnosticListener.WriteCommandBefore(this, Transaction);
+            Exception? e = null;
+            try
+            {
+                return await _inner.ExecuteScalarAsync(cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                e = ex;
+                throw;
+            }
+            finally
+            {
+                if (e != null)
+                    DiagnosticListener.WriteCommandError(operationId, this, Transaction, e);
+                else
+                    DiagnosticListener.WriteCommandAfter(operationId, this, Transaction);
+            }
+        }
+
+        public override int ExecuteNonQuery()
+        {
+            var operationId = DiagnosticListener.WriteCommandBefore(this, Transaction);
+            Exception? e = null;
+            try
+            {
+                return _inner.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                e = ex;
+                throw;
+            }
+            finally
+            {
+                if (e != null)
+                    DiagnosticListener.WriteCommandError(operationId, this, Transaction, e);
+                else
+                    DiagnosticListener.WriteCommandAfter(operationId, this, Transaction);
+            }
+        }
+
+        public override object ExecuteScalar()
+        {
+            var operationId = DiagnosticListener.WriteCommandBefore(this, Transaction);
+            Exception? e = null;
+            try
+            {
+                return _inner.ExecuteScalar();
+            }
+            catch (Exception ex)
+            {
+                e = ex;
+                throw;
+            }
+            finally
+            {
+                if (e != null)
+                    DiagnosticListener.WriteCommandError(operationId, this, Transaction, e);
+                else
+                    DiagnosticListener.WriteCommandAfter(operationId, this, Transaction);
+            }
+        }
+
+        protected override DbDataReader ExecuteDbDataReader(CommandBehavior behavior)
+        {
+            var operationId = DiagnosticListener.WriteCommandBefore(this, Transaction);
+            Exception? e = null;
+            try
+            {
+                return _inner.ExecuteReader(behavior);
+            }
+            catch (Exception ex)
+            {
+                e = ex;
+                throw;
+            }
+            finally
+            {
+                if (e != null)
+                    DiagnosticListener.WriteCommandError(operationId, this, Transaction, e);
+                else
+                    DiagnosticListener.WriteCommandAfter(operationId, this, Transaction);
+            }
+        }
+
+        protected override async Task<DbDataReader> ExecuteDbDataReaderAsync(CommandBehavior behavior,
+            CancellationToken cancellationToken)
+        {
+            var operationId = DiagnosticListener.WriteCommandBefore(this, Transaction);
+            Exception? e = null;
+            try
+            {
+                return await _inner.ExecuteReaderAsync(behavior, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                e = ex;
+                throw;
+            }
+            finally
+            {
+                if (e != null)
+                    DiagnosticListener.WriteCommandError(operationId, this, Transaction, e);
+                else
+                    DiagnosticListener.WriteCommandAfter(operationId, this, Transaction);
+            }
+        }
+    }
+}

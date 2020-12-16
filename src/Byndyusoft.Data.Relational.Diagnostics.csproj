@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netcoreapp3.1;netstandard2.1</TargetFrameworks>
+    <RootNamespace>Microsoft.Data.Diagnostics</RootNamespace>
+    <Version>0.1.0</Version>
+    <PackageId>Byndyusoft.Data.Relational.Diagnostics</PackageId>
+    <Title>Byndyusoft.Data.Relational.Diagnostics</Title>
+    <Authors>Byndyusoft</Authors>
+    <Description>
+    </Description>
+    <PackageTags>Byndyusoft;Data;Relational;Diagnostics</PackageTags>
+    <RepositoryUrl>https://github.com/Byndyusoft/Byndyusoft.Data.Relational.Diagnostics</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageIcon>icon.png</PackageIcon>
+    <LangVersion>8.0</LangVersion>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\icon.png" Pack="true" PackagePath="icon.png" />
+  </ItemGroup>
+
+
+</Project>
