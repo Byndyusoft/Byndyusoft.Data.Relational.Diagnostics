@@ -1,3 +1,5 @@
+// ReSharper disable ExplicitCallerInfoArgument
+
 using System;
 using System.Data;
 using System.Data.Common;
