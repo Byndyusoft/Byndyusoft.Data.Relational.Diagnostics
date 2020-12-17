@@ -36,7 +36,7 @@ namespace Byndyusoft.Data.Relational.Diagnostics.Tests.Unit
         public void AddDiagnosting_NullTransaction_ThrowsException()
         {
             // act
-            var exception = Assert.Throws<ArgumentNullException>(() => ((DbTransaction)null).AddDiagnosting());
+            var exception = Assert.Throws<ArgumentNullException>(() => ((DbTransaction) null).AddDiagnosting());
 
             // assert
             Assert.Equal("transaction", exception.ParamName);
@@ -60,7 +60,7 @@ namespace Byndyusoft.Data.Relational.Diagnostics.Tests.Unit
         public void AddDiagnosting_NullCommand_ThrowsException()
         {
             // act
-            var exception = Assert.Throws<ArgumentNullException>(() => ((DbCommand)null).AddDiagnosting());
+            var exception = Assert.Throws<ArgumentNullException>(() => ((DbCommand) null).AddDiagnosting());
 
             // assert
             Assert.Equal("command", exception.ParamName);

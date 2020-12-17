@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Data;
 using System.Data.Common;
+
+#if ADO_NET_ASYNC
 using System.Threading;
 using System.Threading.Tasks;
+#endif
 
 namespace Microsoft.Data.Diagnostics
 {
@@ -29,7 +32,7 @@ namespace Microsoft.Data.Diagnostics
         {
             return Inner.InitializeLifetimeService();
         }
-        
+
         public override void Commit()
         {
             var connection = Connection;
@@ -42,7 +45,8 @@ namespace Microsoft.Data.Diagnostics
             }
             catch (Exception ex)
             {
-                DiagnosticListenerListener.OnTransactionCommittingError(operationId, isolationLevel, connection, this, ex);
+                DiagnosticListenerListener.OnTransactionCommittingError(operationId, isolationLevel, connection, this,
+                    ex);
                 throw;
             }
         }
@@ -86,7 +90,6 @@ namespace Microsoft.Data.Diagnostics
         }
 
 #if ADO_NET_ASYNC
-
         public override async Task CommitAsync(CancellationToken cancellationToken = default)
         {
             var connection = Connection;

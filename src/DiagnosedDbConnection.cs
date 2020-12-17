@@ -158,7 +158,6 @@ namespace Microsoft.Data.Diagnostics
         }
 
 #if ADO_NET_ASYNC
-
         protected override async ValueTask<DbTransaction> BeginDbTransactionAsync(IsolationLevel isolationLevel,
             CancellationToken cancellationToken)
         {

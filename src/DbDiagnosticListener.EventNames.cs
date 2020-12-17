@@ -25,6 +25,7 @@
 
             public const string TransactionRollingBack = Prefix + nameof(TransactionRollingBack);
             public const string TransactionRolledBack = Prefix + nameof(TransactionRolledBack);
+
             public const string TransactionRollingBackError = Prefix + nameof(TransactionRollingBackError);
             // ReSharper enable InconsistentNaming
         }

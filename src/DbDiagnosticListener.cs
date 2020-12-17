@@ -12,7 +12,7 @@ namespace Microsoft.Data.Diagnostics
         public DbDiagnosticListener() : base(nameof(DbDiagnosticListener))
         {
         }
-        
+
         internal Guid OnCommandExecuting(DbCommand command,
             DbTransaction? transaction, [CallerMemberName] string operation = "")
         {

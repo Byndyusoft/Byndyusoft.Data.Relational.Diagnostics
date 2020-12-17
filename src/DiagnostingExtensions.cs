@@ -6,11 +6,14 @@ namespace Microsoft.Data.Diagnostics
     public static class DiagnostingExtensions
     {
         /// <summary>
-        ///     Adds <see cref="System.Diagnostics.DiagnosticSource"/> tracing to the <param name="transaction">.</param>
+        ///     Adds <see cref="System.Diagnostics.DiagnosticSource" /> tracing to the
+        ///     <param name="transaction">.</param>
         /// </summary>
-        /// <param name="transaction">Instance of <see cref="DbTransaction"/>.</param>
-        /// <exception cref="ArgumentNullException">If <param name="transaction"> is null.</param></exception>
-        /// <returns>Instance of <see cref="DbTransaction"/> with enabled tracing.</returns>
+        /// <param name="transaction">Instance of <see cref="DbTransaction" />.</param>
+        /// <exception cref="ArgumentNullException">If
+        ///     <param name="transaction"> is null.</param>
+        /// </exception>
+        /// <returns>Instance of <see cref="DbTransaction" /> with enabled tracing.</returns>
         public static DbTransaction AddDiagnosting(this DbTransaction transaction)
         {
             if (transaction == null) throw new ArgumentNullException(nameof(transaction));
@@ -19,11 +22,14 @@ namespace Microsoft.Data.Diagnostics
         }
 
         /// <summary>
-        ///     Adds <see cref="System.Diagnostics.DiagnosticSource"/> tracing to the <param name="connection">.</param>
+        ///     Adds <see cref="System.Diagnostics.DiagnosticSource" /> tracing to the
+        ///     <param name="connection">.</param>
         /// </summary>
-        /// <param name="connection">Instance of <see cref="DbConnection"/>.</param>
-        /// <exception cref="ArgumentNullException">If <param name="connection"> is null.</param></exception>
-        /// <returns>Instance of <see cref="DbConnection"/> with enabled tracing.</returns>
+        /// <param name="connection">Instance of <see cref="DbConnection" />.</param>
+        /// <exception cref="ArgumentNullException">If
+        ///     <param name="connection"> is null.</param>
+        /// </exception>
+        /// <returns>Instance of <see cref="DbConnection" /> with enabled tracing.</returns>
         public static DbConnection AddDiagnosting(this DbConnection connection)
         {
             if (connection == null) throw new ArgumentNullException(nameof(connection));
@@ -32,11 +38,14 @@ namespace Microsoft.Data.Diagnostics
         }
 
         /// <summary>
-        ///     Adds <see cref="System.Diagnostics.DiagnosticSource"/> tracing to the <param name="command">.</param>
+        ///     Adds <see cref="System.Diagnostics.DiagnosticSource" /> tracing to the
+        ///     <param name="command">.</param>
         /// </summary>
-        /// <param name="command">Instance of <see cref="DbCommand"/>.</param>
-        /// <exception cref="ArgumentNullException">If <param name="command"> is null.</param></exception>
-        /// <returns>Instance of <see cref="DbCommand"/> with enabled tracing.</returns>
+        /// <param name="command">Instance of <see cref="DbCommand" />.</param>
+        /// <exception cref="ArgumentNullException">If
+        ///     <param name="command"> is null.</param>
+        /// </exception>
+        /// <returns>Instance of <see cref="DbCommand" /> with enabled tracing.</returns>
         public static DbCommand AddDiagnosting(this DbCommand command)
         {
             if (command == null) throw new ArgumentNullException(nameof(command));

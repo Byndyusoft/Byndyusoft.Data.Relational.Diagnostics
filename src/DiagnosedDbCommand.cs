@@ -218,7 +218,6 @@ namespace Microsoft.Data.Diagnostics
         }
 
 #if ADO_NET_ASYNC
-
         public override ValueTask DisposeAsync()
         {
             return Inner.DisposeAsync();
@@ -229,8 +228,6 @@ namespace Microsoft.Data.Diagnostics
             return Inner.PrepareAsync(cancellationToken);
         }
 
-#endif 
-
-
+#endif
     }
 }
