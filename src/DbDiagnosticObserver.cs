@@ -17,7 +17,7 @@ namespace Microsoft.Data.Diagnostics
         {
             {DbDiagnosticListener.EventNames.CommandExecuting, (observer, value) => observer.OnCommandExecuting((CommandPayload)value)},
             {DbDiagnosticListener.EventNames.CommandExecuted, (observer, value) => observer.OnCommandExecuted((CommandPayload)value)},
-            {DbDiagnosticListener.EventNames.CommandExecutingError, (observer, value) => observer.OnCommandError((CommandPayload)value)},
+            {DbDiagnosticListener.EventNames.CommandExecutingError, (observer, value) => observer.OnCommandExecutingError((CommandPayload)value)},
             {DbDiagnosticListener.EventNames.ConnectionOpening, (observer, value) => observer.OnConnectionOpening((ConnectionPayload)value)},
             {DbDiagnosticListener.EventNames.ConnectionOpened, (observer, value) => observer.OnConnectionOpened((ConnectionPayload)value)},
             {DbDiagnosticListener.EventNames.ConnectionOpeningError, (observer, value) => observer.OnConnectionOpeningError((ConnectionPayload)value)},
@@ -76,7 +76,7 @@ namespace Microsoft.Data.Diagnostics
         {
         }
 
-        protected virtual void OnCommandError(CommandPayload payload)
+        protected virtual void OnCommandExecutingError(CommandPayload payload)
         {
         }
 
