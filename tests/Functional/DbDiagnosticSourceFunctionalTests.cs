@@ -13,7 +13,7 @@ using Xunit;
 
 namespace Byndyusoft.Data.Relational.Diagnostics.Tests.Functional
 {
-    public class DbSessionAccessorFunctionalTests : IAsyncLifetime
+    public class DbDiagnosticSourceFunctionalTests : IAsyncLifetime
     {
         private readonly string _connectionString = "Data Source=queries.db";
 
