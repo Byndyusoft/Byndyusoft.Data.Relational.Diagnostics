@@ -9,7 +9,7 @@ using IsolationLevel = System.Data.IsolationLevel;
 
 namespace Microsoft.Data.Diagnostics
 {
-    public class DiagnosedDbConnection : DbConnection
+    internal class DiagnosedDbConnection : DbConnection
     {
         private static readonly DbDiagnosticListener DiagnosticListenerListener = new DbDiagnosticListener();
 
