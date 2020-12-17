@@ -81,6 +81,8 @@ namespace Microsoft.Data.Diagnostics
             if (disposing) Inner.Dispose();
         }
 
+#if ADO_NET_ASYNC
+
         public override async Task CommitAsync(CancellationToken cancellationToken = default)
         {
             var connection = Connection;
@@ -118,5 +120,7 @@ namespace Microsoft.Data.Diagnostics
                 throw;
             }
         }
+
+#endif
     }
 }

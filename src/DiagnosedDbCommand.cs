@@ -78,19 +78,9 @@ namespace Microsoft.Data.Diagnostics
             _inner.Prepare();
         }
 
-        public override Task PrepareAsync(CancellationToken cancellationToken = default)
-        {
-            return _inner.PrepareAsync(cancellationToken);
-        }
-
         protected override DbParameter CreateDbParameter()
         {
             return _inner.CreateParameter();
-        }
-
-        public override ValueTask DisposeAsync()
-        {
-            return _inner.DisposeAsync();
         }
 
         public override string ToString()
@@ -226,5 +216,21 @@ namespace Microsoft.Data.Diagnostics
                 throw;
             }
         }
+
+#if ADO_NET_ASYNC
+
+        public override ValueTask DisposeAsync()
+        {
+            return _inner.DisposeAsync();
+        }
+
+        public override Task PrepareAsync(CancellationToken cancellationToken = default)
+        {
+            return _inner.PrepareAsync(cancellationToken);
+        }
+
+#endif 
+
+
     }
 }

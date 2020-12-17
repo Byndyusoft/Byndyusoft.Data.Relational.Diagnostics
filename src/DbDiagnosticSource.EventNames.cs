@@ -2,7 +2,7 @@
 {
     public partial class DbDiagnosticSource
     {
-        public static class EventTypes
+        public static class EventNames
         {
             public const string WriteCommandBefore = nameof(DbDiagnosticSource.WriteCommandBefore);
             public const string WriteCommandAfter = nameof(DbDiagnosticSource.WriteCommandAfter);
