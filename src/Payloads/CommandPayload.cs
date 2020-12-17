@@ -7,7 +7,7 @@ namespace Microsoft.Data.Diagnostics.Payloads
     {
         public Guid OperationId { get; set; }
 
-        public string Operation { get; set; } = default!;
+        public string? Operation { get; set; }
 
         public Guid ConnectionId { get; set; }
 

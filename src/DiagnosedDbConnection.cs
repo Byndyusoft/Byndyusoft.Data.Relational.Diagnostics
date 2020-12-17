@@ -11,14 +11,9 @@ namespace Microsoft.Data.Diagnostics
 {
     public class DiagnosedDbConnection : DbConnection
     {
-        private static readonly DbDiagnosticListener DiagnosticListener = DbDiagnosticListener.Instance;
+        private static readonly DbDiagnosticSource DiagnosticSourceListener = new DbDiagnosticSource();
 
-        private readonly DbConnection _inner = default!;
-
-        internal DiagnosedDbConnection()
-        {
-            ClientConnectionId = Guid.NewGuid();
-        }
+        private readonly DbConnection _inner;
 
         public DiagnosedDbConnection(DbConnection inner)
         {
@@ -26,6 +21,8 @@ namespace Microsoft.Data.Diagnostics
         }
 
         public override int ConnectionTimeout => _inner.ConnectionTimeout;
+
+        internal DbConnection Inner => _inner;
 
         public override ISite Site
         {
@@ -47,11 +44,9 @@ namespace Microsoft.Data.Diagnostics
 
         public override string? ServerVersion => _inner.ServerVersion;
 
-        internal Guid ClientConnectionId { get; }
-
         public override void Close()
         {
-            var operationId = DiagnosticListener.WriteConnectionCloseBefore(this);
+            var operationId = DiagnosticSourceListener.WriteConnectionCloseBefore(this);
             Exception? e = null;
             try
             {
@@ -65,15 +60,15 @@ namespace Microsoft.Data.Diagnostics
             finally
             {
                 if (e != null)
-                    DiagnosticListener.WriteConnectionCloseError(operationId, ClientConnectionId, this, e);
+                    DiagnosticSourceListener.WriteConnectionCloseError(operationId, this, e);
                 else
-                    DiagnosticListener.WriteConnectionCloseAfter(operationId, ClientConnectionId, this);
+                    DiagnosticSourceListener.WriteConnectionCloseAfter(operationId, this);
             }
         }
 
         public override void Open()
         {
-            var operationId = DiagnosticListener.WriteConnectionOpenBefore(this);
+            var operationId = DiagnosticSourceListener.WriteConnectionOpenBefore(this);
             Exception? e = null;
             try
             {
@@ -87,15 +82,15 @@ namespace Microsoft.Data.Diagnostics
             finally
             {
                 if (e != null)
-                    DiagnosticListener.WriteConnectionOpenError(operationId, this, e);
+                    DiagnosticSourceListener.WriteConnectionOpenError(operationId, this, e);
                 else
-                    DiagnosticListener.WriteConnectionOpenAfter(operationId, this);
+                    DiagnosticSourceListener.WriteConnectionOpenAfter(operationId, this);
             }
         }
 
         public override async Task OpenAsync(CancellationToken cancellationToken)
         {
-            var operationId = DiagnosticListener.WriteConnectionOpenBefore(this);
+            var operationId = DiagnosticSourceListener.WriteConnectionOpenBefore(this);
             Exception? e = null;
             try
             {
@@ -109,9 +104,9 @@ namespace Microsoft.Data.Diagnostics
             finally
             {
                 if (e != null)
-                    DiagnosticListener.WriteConnectionOpenError(operationId, this, e);
+                    DiagnosticSourceListener.WriteConnectionOpenError(operationId, this, e);
                 else
-                    DiagnosticListener.WriteConnectionOpenAfter(operationId, this);
+                    DiagnosticSourceListener.WriteConnectionOpenAfter(operationId, this);
             }
         }
 
@@ -192,7 +187,7 @@ namespace Microsoft.Data.Diagnostics
 
         public override async Task CloseAsync()
         {
-            var operationId = DiagnosticListener.WriteConnectionCloseBefore(this);
+            var operationId = DiagnosticSourceListener.WriteConnectionCloseBefore(this);
             Exception? e = null;
             try
             {
@@ -206,9 +201,9 @@ namespace Microsoft.Data.Diagnostics
             finally
             {
                 if (e != null)
-                    DiagnosticListener.WriteConnectionCloseError(operationId, ClientConnectionId, this, e);
+                    DiagnosticSourceListener.WriteConnectionCloseError(operationId, this, e);
                 else
-                    DiagnosticListener.WriteConnectionCloseAfter(operationId, ClientConnectionId, this);
+                    DiagnosticSourceListener.WriteConnectionCloseAfter(operationId, this);
             }
         }
     }

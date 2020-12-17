@@ -9,7 +9,7 @@ namespace Microsoft.Data.Diagnostics
 {
     internal class DiagnosedDbCommand : DbCommand
     {
-        private static readonly DbDiagnosticListener DiagnosticListener = DbDiagnosticListener.Instance;
+        private static readonly DbDiagnosticSource DiagnosticSourceListener = new DbDiagnosticSource();
 
         private readonly DbCommand _inner;
 
@@ -42,22 +42,18 @@ namespace Microsoft.Data.Diagnostics
             set => _inner.UpdatedRowSource = value;
         }
 
-        internal new DiagnosedDbConnection Connection => (DiagnosedDbConnection) _inner.Connection;
-
-        private new DiagnosedDbTransaction Transaction => (DiagnosedDbTransaction) _inner.Transaction;
-
         protected override DbConnection DbConnection
         {
-            get => _inner.Connection.AddDiagnosting();
-            set => _inner.Connection = value;
+            get => _inner.Connection.GetUnderlying();
+            set => _inner.Connection = value.GetUnderlying();
         }
 
         protected override DbParameterCollection DbParameterCollection => _inner.Parameters;
 
-        protected override DbTransaction DbTransaction
+        protected override DbTransaction? DbTransaction
         {
-            get => _inner.Transaction.AddDiagnosting();
-            set => _inner.Transaction = value;
+            get => _inner.Transaction.GetUnderlying();
+            set => _inner.Transaction = value?.GetUnderlying();
         }
 
         public override bool DesignTimeVisible
@@ -129,7 +125,7 @@ namespace Microsoft.Data.Diagnostics
 
         public override async Task<int> ExecuteNonQueryAsync(CancellationToken cancellationToken)
         {
-            var operationId = DiagnosticListener.WriteCommandBefore(this, Transaction);
+            var operationId = DiagnosticSourceListener.WriteCommandBefore(this, Transaction);
             Exception? e = null;
             try
             {
@@ -144,15 +140,15 @@ namespace Microsoft.Data.Diagnostics
             finally
             {
                 if (e != null)
-                    DiagnosticListener.WriteCommandError(operationId, this, Transaction, e);
+                    DiagnosticSourceListener.WriteCommandError(operationId, this, Transaction, e);
                 else
-                    DiagnosticListener.WriteCommandAfter(operationId, this, Transaction);
+                    DiagnosticSourceListener.WriteCommandAfter(operationId, this, Transaction);
             }
         }
 
         public override async Task<object> ExecuteScalarAsync(CancellationToken cancellationToken)
         {
-            var operationId = DiagnosticListener.WriteCommandBefore(this, Transaction);
+            var operationId = DiagnosticSourceListener.WriteCommandBefore(this, Transaction);
             Exception? e = null;
             try
             {
@@ -167,15 +163,15 @@ namespace Microsoft.Data.Diagnostics
             finally
             {
                 if (e != null)
-                    DiagnosticListener.WriteCommandError(operationId, this, Transaction, e);
+                    DiagnosticSourceListener.WriteCommandError(operationId, this, Transaction, e);
                 else
-                    DiagnosticListener.WriteCommandAfter(operationId, this, Transaction);
+                    DiagnosticSourceListener.WriteCommandAfter(operationId, this, Transaction);
             }
         }
 
         public override int ExecuteNonQuery()
         {
-            var operationId = DiagnosticListener.WriteCommandBefore(this, Transaction);
+            var operationId = DiagnosticSourceListener.WriteCommandBefore(this, Transaction);
             Exception? e = null;
             try
             {
@@ -189,15 +185,15 @@ namespace Microsoft.Data.Diagnostics
             finally
             {
                 if (e != null)
-                    DiagnosticListener.WriteCommandError(operationId, this, Transaction, e);
+                    DiagnosticSourceListener.WriteCommandError(operationId, this, Transaction, e);
                 else
-                    DiagnosticListener.WriteCommandAfter(operationId, this, Transaction);
+                    DiagnosticSourceListener.WriteCommandAfter(operationId, this, Transaction);
             }
         }
 
         public override object ExecuteScalar()
         {
-            var operationId = DiagnosticListener.WriteCommandBefore(this, Transaction);
+            var operationId = DiagnosticSourceListener.WriteCommandBefore(this, Transaction);
             Exception? e = null;
             try
             {
@@ -211,15 +207,15 @@ namespace Microsoft.Data.Diagnostics
             finally
             {
                 if (e != null)
-                    DiagnosticListener.WriteCommandError(operationId, this, Transaction, e);
+                    DiagnosticSourceListener.WriteCommandError(operationId, this, Transaction, e);
                 else
-                    DiagnosticListener.WriteCommandAfter(operationId, this, Transaction);
+                    DiagnosticSourceListener.WriteCommandAfter(operationId, this, Transaction);
             }
         }
 
         protected override DbDataReader ExecuteDbDataReader(CommandBehavior behavior)
         {
-            var operationId = DiagnosticListener.WriteCommandBefore(this, Transaction);
+            var operationId = DiagnosticSourceListener.WriteCommandBefore(this, Transaction);
             Exception? e = null;
             try
             {
@@ -233,16 +229,16 @@ namespace Microsoft.Data.Diagnostics
             finally
             {
                 if (e != null)
-                    DiagnosticListener.WriteCommandError(operationId, this, Transaction, e);
+                    DiagnosticSourceListener.WriteCommandError(operationId, this, Transaction, e);
                 else
-                    DiagnosticListener.WriteCommandAfter(operationId, this, Transaction);
+                    DiagnosticSourceListener.WriteCommandAfter(operationId, this, Transaction);
             }
         }
 
         protected override async Task<DbDataReader> ExecuteDbDataReaderAsync(CommandBehavior behavior,
             CancellationToken cancellationToken)
         {
-            var operationId = DiagnosticListener.WriteCommandBefore(this, Transaction);
+            var operationId = DiagnosticSourceListener.WriteCommandBefore(this, Transaction);
             Exception? e = null;
             try
             {
@@ -257,9 +253,9 @@ namespace Microsoft.Data.Diagnostics
             finally
             {
                 if (e != null)
-                    DiagnosticListener.WriteCommandError(operationId, this, Transaction, e);
+                    DiagnosticSourceListener.WriteCommandError(operationId, this, Transaction, e);
                 else
-                    DiagnosticListener.WriteCommandAfter(operationId, this, Transaction);
+                    DiagnosticSourceListener.WriteCommandAfter(operationId, this, Transaction);
             }
         }
     }

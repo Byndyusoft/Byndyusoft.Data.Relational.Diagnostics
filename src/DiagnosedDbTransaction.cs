@@ -8,35 +8,31 @@ namespace Microsoft.Data.Diagnostics
 {
     internal class DiagnosedDbTransaction : DbTransaction
     {
-        private static long _id;
-        private static readonly DbDiagnosticListener DiagnosticListener = DbDiagnosticListener.Instance;
-
-        private readonly DbTransaction _inner;
+        private static readonly DbDiagnosticSource DiagnosticSourceListener = new DbDiagnosticSource();
 
         public DiagnosedDbTransaction(DbTransaction transaction)
         {
-            _inner = transaction ?? throw new ArgumentNullException(nameof(transaction));
-            TransactionId = Interlocked.Increment(ref _id);
+            Inner = transaction ?? throw new ArgumentNullException(nameof(transaction));
         }
 
-        public long TransactionId { get; }
+        public DbTransaction Inner { get; }
 
-        public override IsolationLevel IsolationLevel => _inner.IsolationLevel;
+        public override IsolationLevel IsolationLevel => Inner.IsolationLevel;
 
-        protected override DbConnection DbConnection => _inner.Connection.AddDiagnosting();
+        protected override DbConnection DbConnection => Inner.Connection.GetUnderlying();
 
         public override object? InitializeLifetimeService()
         {
-            return _inner.InitializeLifetimeService();
+            return Inner.InitializeLifetimeService();
         }
 
         public override void Commit()
         {
-            var operationId = DiagnosticListener.WriteTransactionCommitBefore(IsolationLevel, Connection, this);
+            var operationId = DiagnosticSourceListener.WriteTransactionCommitBefore(IsolationLevel, Connection, this);
             Exception? e = null;
             try
             {
-                _inner.Commit();
+                Inner.Commit();
             }
             catch (Exception ex)
             {
@@ -46,20 +42,20 @@ namespace Microsoft.Data.Diagnostics
             finally
             {
                 if (e != null)
-                    DiagnosticListener.WriteTransactionCommitError(operationId, IsolationLevel, Connection, this,
+                    DiagnosticSourceListener.WriteTransactionCommitError(operationId, IsolationLevel, Connection, this,
                         e);
                 else
-                    DiagnosticListener.WriteTransactionCommitAfter(operationId, IsolationLevel, Connection, this);
+                    DiagnosticSourceListener.WriteTransactionCommitAfter(operationId, IsolationLevel, Connection, this);
             }
         }
 
         public override void Rollback()
         {
-            var operationId = DiagnosticListener.WriteTransactionRollbackBefore(IsolationLevel, Connection, this);
+            var operationId = DiagnosticSourceListener.WriteTransactionRollbackBefore(IsolationLevel, Connection, this);
             Exception? e = null;
             try
             {
-                _inner.Rollback();
+                Inner.Rollback();
             }
             catch (Exception ex)
             {
@@ -69,41 +65,43 @@ namespace Microsoft.Data.Diagnostics
             finally
             {
                 if (e != null)
-                    DiagnosticListener.WriteTransactionRollbackError(operationId, IsolationLevel, Connection,
+                    DiagnosticSourceListener.WriteTransactionRollbackError(operationId, IsolationLevel, Connection,
                         this, e);
                 else
-                    DiagnosticListener.WriteTransactionRollbackAfter(operationId, IsolationLevel, Connection,
+                    DiagnosticSourceListener.WriteTransactionRollbackAfter(operationId, IsolationLevel, Connection,
                         this);
             }
         }
 
         public override string? ToString()
         {
-            return _inner.ToString();
+            return Inner.ToString();
         }
 
         public override bool Equals(object? obj)
         {
-            return ReferenceEquals(this, obj) || _inner.Equals(obj);
+            return ReferenceEquals(this, obj) || Inner.Equals(obj);
         }
 
         public override int GetHashCode()
         {
-            return _inner.GetHashCode();
+            return Inner.GetHashCode();
         }
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing) _inner.Dispose();
+            if (disposing) Inner.Dispose();
         }
 
         public override async Task CommitAsync(CancellationToken cancellationToken = default)
         {
-            var operationId = DiagnosticListener.WriteTransactionCommitBefore(IsolationLevel, Connection, this);
+            var connection = Connection;
+            var isolationLevel = IsolationLevel;
+            var operationId = DiagnosticSourceListener.WriteTransactionCommitBefore(isolationLevel, connection, this);
             Exception? e = null;
             try
             {
-                await _inner.CommitAsync(cancellationToken).ConfigureAwait(false);
+                await Inner.CommitAsync(cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -113,24 +111,24 @@ namespace Microsoft.Data.Diagnostics
             finally
             {
                 if (e != null)
-                    DiagnosticListener.WriteTransactionCommitError(operationId, IsolationLevel, Connection, this, e);
+                    DiagnosticSourceListener.WriteTransactionCommitError(operationId, isolationLevel, connection, this, e);
                 else
-                    DiagnosticListener.WriteTransactionCommitAfter(operationId, IsolationLevel, Connection, this);
+                    DiagnosticSourceListener.WriteTransactionCommitAfter(operationId, isolationLevel, connection, this);
             }
         }
 
         public override ValueTask DisposeAsync()
         {
-            return _inner.DisposeAsync();
+            return Inner.DisposeAsync();
         }
 
         public override async Task RollbackAsync(CancellationToken cancellationToken = default)
         {
-            var operationId = DiagnosticListener.WriteTransactionRollbackBefore(IsolationLevel, Connection, this);
+            var operationId = DiagnosticSourceListener.WriteTransactionRollbackBefore(IsolationLevel, Connection, this);
             Exception? e = null;
             try
             {
-                await _inner.RollbackAsync(cancellationToken).ConfigureAwait(false);
+                await Inner.RollbackAsync(cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -140,9 +138,9 @@ namespace Microsoft.Data.Diagnostics
             finally
             {
                 if (e != null)
-                    DiagnosticListener.WriteTransactionRollbackError(operationId, IsolationLevel, Connection, this, e);
+                    DiagnosticSourceListener.WriteTransactionRollbackError(operationId, IsolationLevel, Connection, this, e);
                 else
-                    DiagnosticListener.WriteTransactionRollbackAfter(operationId, IsolationLevel, Connection, this);
+                    DiagnosticSourceListener.WriteTransactionRollbackAfter(operationId, IsolationLevel, Connection, this);
             }
         }
     }
