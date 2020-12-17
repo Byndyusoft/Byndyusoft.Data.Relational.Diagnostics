@@ -10,6 +10,7 @@ namespace Microsoft.Data.Diagnostics
         IObserver<KeyValuePair<string, object?>>,
         IDisposable
     {
+        private bool _disposed;
         private IDisposable? _executing;
         private readonly List<IDisposable> _subscriptions = new List<IDisposable>();
         
@@ -34,16 +35,22 @@ namespace Microsoft.Data.Diagnostics
 
         public void Start()
         {
+            ThrowIfDisposed();
+
             if (_executing != null)
                 throw new InvalidOperationException("DbDiagnosticObserver is already started");
 
+            OnStart();
             _executing = DiagnosticListener.AllListeners.Subscribe(this);
         }
 
         public void Stop()
         {
+            ThrowIfDisposed();
+
             if (_executing != null)
             {
+                OnStop();
                 _executing.Dispose();
                 _executing = null;
             }
@@ -51,8 +58,12 @@ namespace Microsoft.Data.Diagnostics
 
         public void Dispose()
         {
+            if (_disposed)
+                return;
+
             Stop();
             GC.SuppressFinalize(this);
+            _disposed = true;
         }
 
         protected virtual void OnStart()
@@ -161,6 +172,12 @@ namespace Microsoft.Data.Diagnostics
                 return;
 
             method(this, value.Value!);
+        }
+
+        private void ThrowIfDisposed()
+        {
+            if (_disposed)
+                throw new ObjectDisposedException(nameof(DbDiagnosticObserver));
         }
     }
 }
