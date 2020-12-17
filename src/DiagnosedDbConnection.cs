@@ -122,7 +122,11 @@ namespace Microsoft.Data.Diagnostics
             return Inner.GetSchema(collectionName, restrictionValues);
         }
 
+#if NETCOREAPP
+        public override object InitializeLifetimeService()
+#else
         public override object? InitializeLifetimeService()
+#endif
         {
             return Inner.InitializeLifetimeService();
         }

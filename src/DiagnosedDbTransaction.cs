@@ -21,11 +21,15 @@ namespace Microsoft.Data.Diagnostics
 
         protected override DbConnection DbConnection => Inner.Connection.GetUnderlying();
 
+#if NETCOREAPP
+        public override object InitializeLifetimeService()
+#else
         public override object? InitializeLifetimeService()
+#endif
         {
             return Inner.InitializeLifetimeService();
         }
-
+        
         public override void Commit()
         {
             var operationId = DiagnosticSourceListener.WriteTransactionCommitBefore(IsolationLevel, Connection, this);

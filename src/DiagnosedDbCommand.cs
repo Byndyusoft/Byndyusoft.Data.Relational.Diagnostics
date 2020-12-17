@@ -98,7 +98,11 @@ namespace Microsoft.Data.Diagnostics
             return _inner.ToString();
         }
 
+#if NETCOREAPP
+        public override object InitializeLifetimeService()
+#else
         public override object? InitializeLifetimeService()
+#endif
         {
             return _inner.InitializeLifetimeService();
         }
