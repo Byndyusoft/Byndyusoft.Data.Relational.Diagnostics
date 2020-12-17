@@ -11,6 +11,7 @@
       Adds System.Diagnostics.DiagnosticSource diagnostics suport to DbConnection.
       Commonly Used Types:
       Microsoft.Data.Diagnostics.DiagnostingExtensions
+      Microsoft.Data.Diagnostics.DbDiagnosticObserver
     </Description>
     <PackageTags>Byndyusoft;Data;Relational;Diagnostics</PackageTags>
     <RepositoryUrl>https://github.com/Byndyusoft/Byndyusoft.Data.Relational.Diagnostics</RepositoryUrl>
