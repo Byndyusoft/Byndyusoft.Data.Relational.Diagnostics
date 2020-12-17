@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1;netstandard2.1</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;netcoreapp3.1</TargetFrameworks>
     <RootNamespace>Microsoft.Data.Diagnostics</RootNamespace>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
     <PackageId>Byndyusoft.Data.Relational.Diagnostics</PackageId>
     <Title>Byndyusoft.Data.Relational.Diagnostics</Title>
     <Authors>Byndyusoft</Authors>
@@ -21,13 +21,16 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(TargetFramework)' != 'netstandard2.0'">
+    <DefineConstants>ADO_NET_ASYNC</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Include="..\icon.png" Pack="true" PackagePath="icon.png" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework.Contains(netstandard))' == 'true'">
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="5.0.0" />
   </ItemGroup>
-
 
 </Project>

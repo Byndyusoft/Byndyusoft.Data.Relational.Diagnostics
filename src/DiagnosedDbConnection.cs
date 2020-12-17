@@ -57,21 +57,6 @@ namespace Microsoft.Data.Diagnostics
             }
         }
 
-        public override async Task CloseAsync()
-        {
-            var operationId = DiagnosticSourceListener.WriteConnectionCloseBefore(this);
-            try
-            {
-                await Inner.CloseAsync().ConfigureAwait(false);
-                DiagnosticSourceListener.WriteConnectionCloseAfter(operationId, this);
-            }
-            catch (Exception ex)
-            {
-                DiagnosticSourceListener.WriteConnectionCloseError(operationId, this, ex);
-                throw;
-            }
-        }
-
         public override void Open()
         {
             var operationId = DiagnosticSourceListener.WriteConnectionOpenBefore(this);
@@ -172,6 +157,8 @@ namespace Microsoft.Data.Diagnostics
             if (disposing) Inner.Dispose();
         }
 
+#if ADO_NET_ASYNC
+
         protected override async ValueTask<DbTransaction> BeginDbTransactionAsync(IsolationLevel isolationLevel,
             CancellationToken cancellationToken)
         {
@@ -179,5 +166,22 @@ namespace Microsoft.Data.Diagnostics
                 .ConfigureAwait(false);
             return transaction.AddDiagnosting();
         }
+
+         public override async Task CloseAsync()
+        {
+            var operationId = DiagnosticSourceListener.WriteConnectionCloseBefore(this);
+            try
+            {
+                await Inner.CloseAsync().ConfigureAwait(false);
+                DiagnosticSourceListener.WriteConnectionCloseAfter(operationId, this);
+            }
+            catch (Exception ex)
+            {
+                DiagnosticSourceListener.WriteConnectionCloseError(operationId, this, ex);
+                throw;
+            }
+        }
+
+#endif
     }
 }
