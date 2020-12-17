@@ -8,6 +8,9 @@
     <Title>Byndyusoft.Data.Relational.Diagnostics</Title>
     <Authors>Byndyusoft</Authors>
     <Description>
+      Adds System.Diagnostics.DiagnosticSource diagnostics suport to DbConnection.
+      Commonly Used Types:
+      Microsoft.Data.Diagnostics.DiagnostingExtensions
     </Description>
     <PackageTags>Byndyusoft;Data;Relational;Diagnostics</PackageTags>
     <RepositoryUrl>https://github.com/Byndyusoft/Byndyusoft.Data.Relational.Diagnostics</RepositoryUrl>
