@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Diagnostics;
@@ -8,132 +7,82 @@ using Microsoft.Data.Diagnostics.Payloads;
 
 namespace Microsoft.Data.Diagnostics
 {
-    public partial class DbDiagnosticSource : DiagnosticListener
+    public partial class DbDiagnosticListener : DiagnosticListener
     {
-        public const string DefaultPrefix = "System.Data.Common";
-
-        private static Dictionary<string, string> _eventPrefixes = new Dictionary<string, string>
-        {
-            ["SqlConnection"] = "Microsoft.Data.SqlClient",
-            ["SqliteConnection"] = "Microsoft.Data.Sqlite",
-            ["NpgsqlConnection"] = "System.Data.Npgsql",
-            ["MySqlConnection"] = "System.Data.MySql",
-            ["FbConnection"] = "System.Data.FirebirdClient",
-            ["SQLiteConnection"] = "System.Data.SQLite"
-        };
-
-        public DbDiagnosticSource() : base(nameof(DbDiagnosticSource))
+        public DbDiagnosticListener() : base(nameof(DbDiagnosticListener))
         {
         }
-
-        public static IDisposable AddEventsPrefix(Type connectionType, string prefix)
-        {
-            var revert = new EventsPrefixChangingRevert();
-            _eventPrefixes[connectionType.Name] = prefix;
-            return revert;
-        }
-
-        public static IDisposable ClearEventsPrefixes()
-        {
-            var revert = new EventsPrefixChangingRevert();
-            _eventPrefixes.Clear();
-            return revert;
-        }
-
-        public static string GetEventName(Type connectionType, string eventType)
-        {
-            if (connectionType == null) throw new ArgumentNullException(nameof(connectionType));
-
-            var connectionTypeName = connectionType.Name;
-            if (_eventPrefixes.TryGetValue(connectionTypeName, out var prefix) == false) prefix = DefaultPrefix;
-
-            return $"{prefix}.{eventType}";
-        }
-
-        private static string GetEventName(DbConnection connection, string eventType)
-        {
-            var underlyingConnection = connection.GetUnderlying();
-            return GetEventName(underlyingConnection.GetType(), eventType);
-        }
-
-        internal Guid WriteCommandBefore(DbCommand command,
+        
+        internal Guid OnCommandExecuting(DbCommand command,
             DbTransaction? transaction, [CallerMemberName] string operation = "")
         {
-            var eventName = GetEventName(command.Connection, EventNames.WriteCommandBefore);
-
-            if (!IsEnabled(eventName)) return Guid.Empty;
+            if (!IsEnabled(EventNames.CommandExecuting)) return Guid.Empty;
 
             var operationId = Guid.NewGuid();
             Write(
-                eventName,
+                EventNames.CommandExecuting,
                 new CommandPayload
                 {
                     OperationId = operationId,
                     Operation = operation,
-                    ConnectionId = command.Connection.GetId(),
+                    ConnectionId = command.Connection.GetGuid(),
                     Command = command,
-                    TransactionId = transaction?.GetHashCode(),
+                    TransactionId = transaction?.GetId(),
                     Timestamp = Stopwatch.GetTimestamp()
                 });
 
             return operationId;
         }
 
-        internal void WriteCommandAfter(Guid operationId, DbCommand command,
+        internal void OnCommandExecuted(Guid operationId, DbCommand command,
             DbTransaction? transaction, [CallerMemberName] string operation = "")
         {
-            var eventName = GetEventName(command.Connection, EventNames.WriteCommandAfter);
-
-            if (IsEnabled(eventName))
+            if (IsEnabled(EventNames.CommandExecuted))
                 Write(
-                    eventName,
+                    EventNames.CommandExecuted,
                     new CommandPayload
                     {
                         OperationId = operationId,
                         Operation = operation,
-                        ConnectionId = command.Connection.GetId(),
+                        ConnectionId = command.Connection.GetGuid(),
                         Command = command,
-                        TransactionId = transaction?.GetHashCode(),
+                        TransactionId = transaction?.GetId(),
                         Timestamp = Stopwatch.GetTimestamp()
                     });
         }
 
-        internal void WriteCommandError(Guid operationId, DbCommand command,
+        internal void OnCommandError(Guid operationId, DbCommand command,
             DbTransaction? transaction, Exception ex, [CallerMemberName] string operation = "")
         {
-            var eventName = GetEventName(command.Connection, EventNames.WriteCommandError);
-
-            if (IsEnabled(eventName))
+            if (IsEnabled(EventNames.CommandExecutingError))
                 Write(
-                    eventName,
+                    EventNames.CommandExecutingError,
                     new CommandPayload
                     {
                         OperationId = operationId,
                         Operation = operation,
-                        ConnectionId = command.Connection.GetId(),
+                        ConnectionId = command.Connection.GetGuid(),
                         Command = command,
-                        TransactionId = transaction?.GetHashCode(),
+                        TransactionId = transaction?.GetId(),
                         Exception = ex,
                         Timestamp = Stopwatch.GetTimestamp()
                     });
         }
 
-        internal Guid WriteConnectionOpenBefore(DbConnection connection,
+        internal Guid OnConnectionOpening(DbConnection connection,
             [CallerMemberName] string operation = "")
         {
-            var eventName = GetEventName(connection, EventNames.WriteConnectionOpenBefore);
-
-            if (!IsEnabled(eventName)) return Guid.Empty;
+            if (!IsEnabled(EventNames.ConnectionOpening)) return Guid.Empty;
 
             var operationId = Guid.NewGuid();
             Write(
-                eventName,
+                EventNames.ConnectionOpening,
                 new ConnectionPayload
                 {
                     OperationId = operationId,
                     Operation = operation,
                     Connection = connection,
-                    ConnectionId = connection.GetId(),
+                    ConnectionId = connection.GetGuid(),
                     ClientVersion = connection.GetType().Assembly.GetName().Version?.ToString(),
                     Timestamp = Stopwatch.GetTimestamp()
                 });
@@ -141,38 +90,34 @@ namespace Microsoft.Data.Diagnostics
             return operationId;
         }
 
-        internal void WriteConnectionOpenAfter(Guid operationId,
+        internal void OnConnectionOpened(Guid operationId,
             DbConnection connection, [CallerMemberName] string operation = "")
         {
-            var eventName = GetEventName(connection, EventNames.WriteConnectionOpenAfter);
-
-            if (IsEnabled(eventName))
+            if (IsEnabled(EventNames.ConnectionOpened))
                 Write(
-                    eventName,
+                    EventNames.ConnectionOpened,
                     new ConnectionPayload
                     {
                         OperationId = operationId,
                         Operation = operation,
-                        ConnectionId = connection.GetId(),
+                        ConnectionId = connection.GetGuid(),
                         Connection = connection,
                         ClientVersion = connection.GetType().Assembly.GetName().Version?.ToString(),
                         Timestamp = Stopwatch.GetTimestamp()
                     });
         }
 
-        internal void WriteConnectionOpenError(Guid operationId,
+        internal void OnConnectionOpeningError(Guid operationId,
             DbConnection connection, Exception ex, [CallerMemberName] string operation = "")
         {
-            var eventName = GetEventName(connection, EventNames.WriteConnectionOpenError);
-
-            if (IsEnabled(eventName))
+            if (IsEnabled(EventNames.ConnectionOpeningError))
                 Write(
-                    eventName,
+                    EventNames.ConnectionOpeningError,
                     new ConnectionPayload
                     {
                         OperationId = operationId,
                         Operation = operation,
-                        ConnectionId = connection.GetId(),
+                        ConnectionId = connection.GetGuid(),
                         Connection = connection,
                         ClientVersion = connection.GetType().Assembly.GetName().Version?.ToString(),
                         Exception = ex,
@@ -180,22 +125,20 @@ namespace Microsoft.Data.Diagnostics
                     });
         }
 
-        internal Guid WriteConnectionCloseBefore(DbConnection connection,
+        internal Guid OnConnectionClosing(DbConnection connection,
             [CallerMemberName] string operation = "")
         {
-            var eventName = GetEventName(connection, EventNames.WriteConnectionCloseBefore);
-
-            if (!IsEnabled(eventName)) return Guid.Empty;
+            if (!IsEnabled(EventNames.ConnectionClosing)) return Guid.Empty;
 
             var operationId = Guid.NewGuid();
 
             Write(
-                eventName,
+                EventNames.ConnectionClosing,
                 new ConnectionPayload
                 {
                     OperationId = operationId,
                     Operation = operation,
-                    ConnectionId = connection.GetId(),
+                    ConnectionId = connection.GetGuid(),
                     Connection = connection,
                     Timestamp = Stopwatch.GetTimestamp()
                 });
@@ -203,54 +146,48 @@ namespace Microsoft.Data.Diagnostics
             return operationId;
         }
 
-        internal void WriteConnectionCloseAfter(Guid operationId, DbConnection connection,
+        internal void OnConnectionClosed(Guid operationId, DbConnection connection,
             [CallerMemberName] string operation = "")
         {
-            var eventName = GetEventName(connection, EventNames.WriteConnectionCloseAfter);
-
-            if (IsEnabled(eventName))
+            if (IsEnabled(EventNames.ConnectionClosed))
                 Write(
-                    eventName,
+                    EventNames.ConnectionClosed,
                     new ConnectionPayload
                     {
                         OperationId = operationId,
                         Operation = operation,
-                        ConnectionId = connection.GetId(),
+                        ConnectionId = connection.GetGuid(),
                         Connection = connection,
                         Timestamp = Stopwatch.GetTimestamp()
                     });
         }
 
-        internal void WriteConnectionCloseError(Guid operationId, DbConnection connection, Exception ex,
+        internal void OmConnectionClosingError(Guid operationId, DbConnection connection, Exception ex,
             [CallerMemberName] string operation = "")
         {
-            var eventName = GetEventName(connection, EventNames.WriteConnectionCloseError);
-
-            if (IsEnabled(eventName))
+            if (IsEnabled(EventNames.ConnectionClosingError))
                 Write(
-                    eventName,
+                    EventNames.ConnectionClosingError,
                     new ConnectionPayload
                     {
                         OperationId = operationId,
                         Operation = operation,
-                        ConnectionId = connection.GetId(),
+                        ConnectionId = connection.GetGuid(),
                         Connection = connection,
                         Exception = ex,
                         Timestamp = Stopwatch.GetTimestamp()
                     });
         }
 
-        internal Guid WriteTransactionCommitBefore(IsolationLevel isolationLevel,
+        internal Guid OnTransactionCommitting(IsolationLevel isolationLevel,
             DbConnection connection, DbTransaction transaction, [CallerMemberName] string operation = "")
         {
-            var eventName = GetEventName(connection, EventNames.WriteTransactionCommitBefore);
-
-            if (!IsEnabled(eventName)) return Guid.Empty;
+            if (!IsEnabled(EventNames.TransactionCommitting)) return Guid.Empty;
 
             var operationId = Guid.NewGuid();
 
             Write(
-                eventName,
+                EventNames.TransactionCommitting,
                 new TransactionPayload
                 {
                     OperationId = operationId,
@@ -264,15 +201,13 @@ namespace Microsoft.Data.Diagnostics
             return operationId;
         }
 
-        internal void WriteTransactionCommitAfter(Guid operationId,
+        internal void OnTransactionCommitted(Guid operationId,
             IsolationLevel isolationLevel, DbConnection connection, DbTransaction transaction,
             [CallerMemberName] string operation = "")
         {
-            var eventName = GetEventName(connection, EventNames.WriteTransactionCommitAfter);
-
-            if (IsEnabled(eventName))
+            if (IsEnabled(EventNames.TransactionCommitted))
                 Write(
-                    eventName,
+                    EventNames.TransactionCommitted,
                     new TransactionPayload
                     {
                         OperationId = operationId,
@@ -284,15 +219,13 @@ namespace Microsoft.Data.Diagnostics
                     });
         }
 
-        internal void WriteTransactionCommitError(Guid operationId,
+        internal void OnTransactionCommittingError(Guid operationId,
             IsolationLevel isolationLevel, DbConnection connection, DbTransaction transaction, Exception ex,
             [CallerMemberName] string operation = "")
         {
-            var eventName = GetEventName(connection, EventNames.WriteTransactionCommitError);
-
-            if (IsEnabled(eventName))
+            if (IsEnabled(EventNames.TransactionCommittingError))
                 Write(
-                    eventName,
+                    EventNames.TransactionCommittingError,
                     new TransactionPayload
                     {
                         OperationId = operationId,
@@ -305,17 +238,15 @@ namespace Microsoft.Data.Diagnostics
                     });
         }
 
-        internal Guid WriteTransactionRollbackBefore(
+        internal Guid OnTransactionRollingBack(
             IsolationLevel isolationLevel, DbConnection connection, DbTransaction transaction,
             [CallerMemberName] string operation = "")
         {
-            var eventName = GetEventName(connection, EventNames.WriteTransactionRollbackBefore);
-
-            if (!IsEnabled(eventName)) return Guid.Empty;
+            if (!IsEnabled(EventNames.TransactionRollingBack)) return Guid.Empty;
 
             var operationId = Guid.NewGuid();
             Write(
-                eventName,
+                EventNames.TransactionRollingBack,
                 new TransactionPayload
                 {
                     OperationId = operationId,
@@ -329,15 +260,13 @@ namespace Microsoft.Data.Diagnostics
             return operationId;
         }
 
-        internal void WriteTransactionRollbackAfter(Guid operationId,
+        internal void OnTransactionRolledBack(Guid operationId,
             IsolationLevel isolationLevel, DbConnection connection, DbTransaction transaction,
             [CallerMemberName] string operation = "")
         {
-            var eventName = GetEventName(connection, EventNames.WriteTransactionRollbackAfter);
-
-            if (IsEnabled(eventName))
+            if (IsEnabled(EventNames.TransactionRolledBack))
                 Write(
-                    eventName,
+                    EventNames.TransactionRolledBack,
                     new TransactionPayload
                     {
                         OperationId = operationId,
@@ -349,15 +278,13 @@ namespace Microsoft.Data.Diagnostics
                     });
         }
 
-        internal void WriteTransactionRollbackError(Guid operationId,
+        internal void OnTransactionRollingBackError(Guid operationId,
             IsolationLevel isolationLevel, DbConnection connection, DbTransaction transaction, Exception ex,
             [CallerMemberName] string operation = "")
         {
-            var eventName = GetEventName(connection, EventNames.WriteTransactionRollbackError);
-
-            if (IsEnabled(eventName))
+            if (IsEnabled(EventNames.TransactionRollingBackError))
                 Write(
-                    eventName,
+                    EventNames.TransactionRollingBackError,
                     new TransactionPayload
                     {
                         OperationId = operationId,
@@ -368,21 +295,6 @@ namespace Microsoft.Data.Diagnostics
                         Exception = ex,
                         Timestamp = Stopwatch.GetTimestamp()
                     });
-        }
-
-        private class EventsPrefixChangingRevert : IDisposable
-        {
-            private readonly Dictionary<string, string> _previous;
-
-            public EventsPrefixChangingRevert()
-            {
-                _previous = new Dictionary<string, string>(_eventPrefixes);
-            }
-
-            public void Dispose()
-            {
-                _eventPrefixes = _previous;
-            }
         }
     }
 }

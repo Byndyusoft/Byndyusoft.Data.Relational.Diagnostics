@@ -6,11 +6,11 @@ namespace Byndyusoft.Data.Relational.Diagnostics.Tests.Unit
 {
     public static class DbDiagnosticSession
     {
-        public static (string eventName, object payload) Execute(DbDiagnosticSource source, Action action)
+        public static (string eventName, object payload) Execute(DbDiagnosticListener listener, Action action)
         {
             string eventName = null;
             object payload = null;
-            using var observer = source.Subscribe(new Observer(pair => (eventName, payload) = pair));
+            using var observer = listener.Subscribe(new Observer(pair => (eventName, payload) = pair));
             action();
             return (eventName, payload);
         }

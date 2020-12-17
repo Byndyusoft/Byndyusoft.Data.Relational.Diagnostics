@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard2.1;netcoreapp3.1</TargetFrameworks>
     <RootNamespace>Microsoft.Data.Diagnostics</RootNamespace>
-    <Version>0.2.0</Version>
+    <Version>0.3.0</Version>
     <PackageId>Byndyusoft.Data.Relational.Diagnostics</PackageId>
     <Title>Byndyusoft.Data.Relational.Diagnostics</Title>
     <Authors>Byndyusoft</Authors>
