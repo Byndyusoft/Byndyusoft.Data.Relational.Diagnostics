@@ -47,69 +47,62 @@ namespace Microsoft.Data.Diagnostics
         public override void Close()
         {
             var operationId = DiagnosticSourceListener.WriteConnectionCloseBefore(this);
-            Exception? e = null;
             try
             {
                 _inner.Close();
+                DiagnosticSourceListener.WriteConnectionCloseAfter(operationId, this);
             }
             catch (Exception ex)
             {
-                e = ex;
+                DiagnosticSourceListener.WriteConnectionCloseError(operationId, this, ex);
                 throw;
             }
-            finally
+        }
+
+        public override async Task CloseAsync()
+        {
+            var operationId = DiagnosticSourceListener.WriteConnectionCloseBefore(this);
+            try
             {
-                if (e != null)
-                    DiagnosticSourceListener.WriteConnectionCloseError(operationId, this, e);
-                else
-                    DiagnosticSourceListener.WriteConnectionCloseAfter(operationId, this);
+                await _inner.CloseAsync().ConfigureAwait(false);
+                DiagnosticSourceListener.WriteConnectionCloseAfter(operationId, this);
+            }
+            catch (Exception ex)
+            {
+                DiagnosticSourceListener.WriteConnectionCloseError(operationId, this, ex);
+                throw;
             }
         }
 
         public override void Open()
         {
             var operationId = DiagnosticSourceListener.WriteConnectionOpenBefore(this);
-            Exception? e = null;
             try
             {
                 _inner.Open();
+                DiagnosticSourceListener.WriteConnectionOpenAfter(operationId, this);
             }
             catch (Exception ex)
             {
-                e = ex;
+                DiagnosticSourceListener.WriteConnectionOpenError(operationId, this, ex);
                 throw;
-            }
-            finally
-            {
-                if (e != null)
-                    DiagnosticSourceListener.WriteConnectionOpenError(operationId, this, e);
-                else
-                    DiagnosticSourceListener.WriteConnectionOpenAfter(operationId, this);
             }
         }
 
         public override async Task OpenAsync(CancellationToken cancellationToken)
         {
             var operationId = DiagnosticSourceListener.WriteConnectionOpenBefore(this);
-            Exception? e = null;
             try
             {
                 await _inner.OpenAsync(cancellationToken).ConfigureAwait(false);
+                DiagnosticSourceListener.WriteConnectionOpenAfter(operationId, this);
             }
             catch (Exception ex)
             {
-                e = ex;
+                DiagnosticSourceListener.WriteConnectionOpenError(operationId, this, ex);
                 throw;
             }
-            finally
-            {
-                if (e != null)
-                    DiagnosticSourceListener.WriteConnectionOpenError(operationId, this, e);
-                else
-                    DiagnosticSourceListener.WriteConnectionOpenAfter(operationId, this);
-            }
         }
-
 
         public override void EnlistTransaction(Transaction transaction)
         {
@@ -183,28 +176,6 @@ namespace Microsoft.Data.Diagnostics
             var transaction = await _inner.BeginTransactionAsync(isolationLevel, cancellationToken)
                 .ConfigureAwait(false);
             return transaction.AddDiagnosting();
-        }
-
-        public override async Task CloseAsync()
-        {
-            var operationId = DiagnosticSourceListener.WriteConnectionCloseBefore(this);
-            Exception? e = null;
-            try
-            {
-                await _inner.CloseAsync().ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                e = ex;
-                throw;
-            }
-            finally
-            {
-                if (e != null)
-                    DiagnosticSourceListener.WriteConnectionCloseError(operationId, this, e);
-                else
-                    DiagnosticSourceListener.WriteConnectionCloseAfter(operationId, this);
-            }
         }
     }
 }

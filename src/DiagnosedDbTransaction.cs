@@ -29,47 +29,30 @@ namespace Microsoft.Data.Diagnostics
         public override void Commit()
         {
             var operationId = DiagnosticSourceListener.WriteTransactionCommitBefore(IsolationLevel, Connection, this);
-            Exception? e = null;
             try
             {
                 Inner.Commit();
+                DiagnosticSourceListener.WriteTransactionCommitAfter(operationId, IsolationLevel, Connection, this);
             }
             catch (Exception ex)
             {
-                e = ex;
+                DiagnosticSourceListener.WriteTransactionCommitError(operationId, IsolationLevel, Connection, this, ex);
                 throw;
-            }
-            finally
-            {
-                if (e != null)
-                    DiagnosticSourceListener.WriteTransactionCommitError(operationId, IsolationLevel, Connection, this,
-                        e);
-                else
-                    DiagnosticSourceListener.WriteTransactionCommitAfter(operationId, IsolationLevel, Connection, this);
             }
         }
 
         public override void Rollback()
         {
             var operationId = DiagnosticSourceListener.WriteTransactionRollbackBefore(IsolationLevel, Connection, this);
-            Exception? e = null;
             try
             {
                 Inner.Rollback();
+                DiagnosticSourceListener.WriteTransactionRollbackAfter(operationId, IsolationLevel, Connection, this);
             }
             catch (Exception ex)
             {
-                e = ex;
+                DiagnosticSourceListener.WriteTransactionRollbackError(operationId, IsolationLevel, Connection, this, ex);
                 throw;
-            }
-            finally
-            {
-                if (e != null)
-                    DiagnosticSourceListener.WriteTransactionRollbackError(operationId, IsolationLevel, Connection,
-                        this, e);
-                else
-                    DiagnosticSourceListener.WriteTransactionRollbackAfter(operationId, IsolationLevel, Connection,
-                        this);
             }
         }
 
@@ -98,22 +81,15 @@ namespace Microsoft.Data.Diagnostics
             var connection = Connection;
             var isolationLevel = IsolationLevel;
             var operationId = DiagnosticSourceListener.WriteTransactionCommitBefore(isolationLevel, connection, this);
-            Exception? e = null;
             try
             {
                 await Inner.CommitAsync(cancellationToken).ConfigureAwait(false);
+                DiagnosticSourceListener.WriteTransactionCommitAfter(operationId, isolationLevel, connection, this);
             }
             catch (Exception ex)
             {
-                e = ex;
+                DiagnosticSourceListener.WriteTransactionCommitError(operationId, isolationLevel, connection, this, ex);
                 throw;
-            }
-            finally
-            {
-                if (e != null)
-                    DiagnosticSourceListener.WriteTransactionCommitError(operationId, isolationLevel, connection, this, e);
-                else
-                    DiagnosticSourceListener.WriteTransactionCommitAfter(operationId, isolationLevel, connection, this);
             }
         }
 
@@ -125,22 +101,15 @@ namespace Microsoft.Data.Diagnostics
         public override async Task RollbackAsync(CancellationToken cancellationToken = default)
         {
             var operationId = DiagnosticSourceListener.WriteTransactionRollbackBefore(IsolationLevel, Connection, this);
-            Exception? e = null;
             try
             {
                 await Inner.RollbackAsync(cancellationToken).ConfigureAwait(false);
+                DiagnosticSourceListener.WriteTransactionRollbackAfter(operationId, IsolationLevel, Connection, this);
             }
             catch (Exception ex)
             {
-                e = ex;
+                DiagnosticSourceListener.WriteTransactionRollbackError(operationId, IsolationLevel, Connection, this, ex);
                 throw;
-            }
-            finally
-            {
-                if (e != null)
-                    DiagnosticSourceListener.WriteTransactionRollbackError(operationId, IsolationLevel, Connection, this, e);
-                else
-                    DiagnosticSourceListener.WriteTransactionRollbackAfter(operationId, IsolationLevel, Connection, this);
             }
         }
     }

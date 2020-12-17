@@ -126,112 +126,82 @@ namespace Microsoft.Data.Diagnostics
         public override async Task<int> ExecuteNonQueryAsync(CancellationToken cancellationToken)
         {
             var operationId = DiagnosticSourceListener.WriteCommandBefore(this, Transaction);
-            Exception? e = null;
             try
             {
-                return await _inner.ExecuteNonQueryAsync(cancellationToken)
+                var result = await _inner.ExecuteNonQueryAsync(cancellationToken)
                     .ConfigureAwait(false);
+                DiagnosticSourceListener.WriteCommandAfter(operationId, this, Transaction);
+                return result;
             }
             catch (Exception ex)
             {
-                e = ex;
+                DiagnosticSourceListener.WriteCommandError(operationId, this, Transaction, ex);
                 throw;
-            }
-            finally
-            {
-                if (e != null)
-                    DiagnosticSourceListener.WriteCommandError(operationId, this, Transaction, e);
-                else
-                    DiagnosticSourceListener.WriteCommandAfter(operationId, this, Transaction);
             }
         }
 
         public override async Task<object> ExecuteScalarAsync(CancellationToken cancellationToken)
         {
             var operationId = DiagnosticSourceListener.WriteCommandBefore(this, Transaction);
-            Exception? e = null;
             try
             {
-                return await _inner.ExecuteScalarAsync(cancellationToken)
+                var result = await _inner.ExecuteScalarAsync(cancellationToken)
                     .ConfigureAwait(false);
+                DiagnosticSourceListener.WriteCommandAfter(operationId, this, Transaction);
+                return result;
             }
             catch (Exception ex)
             {
-                e = ex;
+                DiagnosticSourceListener.WriteCommandError(operationId, this, Transaction, ex);
                 throw;
-            }
-            finally
-            {
-                if (e != null)
-                    DiagnosticSourceListener.WriteCommandError(operationId, this, Transaction, e);
-                else
-                    DiagnosticSourceListener.WriteCommandAfter(operationId, this, Transaction);
             }
         }
 
         public override int ExecuteNonQuery()
         {
             var operationId = DiagnosticSourceListener.WriteCommandBefore(this, Transaction);
-            Exception? e = null;
             try
             {
-                return _inner.ExecuteNonQuery();
+                var result = _inner.ExecuteNonQuery();
+                DiagnosticSourceListener.WriteCommandAfter(operationId, this, Transaction);
+                return result;
             }
             catch (Exception ex)
             {
-                e = ex;
+                DiagnosticSourceListener.WriteCommandError(operationId, this, Transaction, ex);
                 throw;
-            }
-            finally
-            {
-                if (e != null)
-                    DiagnosticSourceListener.WriteCommandError(operationId, this, Transaction, e);
-                else
-                    DiagnosticSourceListener.WriteCommandAfter(operationId, this, Transaction);
             }
         }
 
         public override object ExecuteScalar()
         {
             var operationId = DiagnosticSourceListener.WriteCommandBefore(this, Transaction);
-            Exception? e = null;
             try
             {
-                return _inner.ExecuteScalar();
+                var result = _inner.ExecuteScalar();
+                DiagnosticSourceListener.WriteCommandAfter(operationId, this, Transaction);
+                return result;
             }
             catch (Exception ex)
             {
-                e = ex;
+                DiagnosticSourceListener.WriteCommandError(operationId, this, Transaction, ex);
                 throw;
-            }
-            finally
-            {
-                if (e != null)
-                    DiagnosticSourceListener.WriteCommandError(operationId, this, Transaction, e);
-                else
-                    DiagnosticSourceListener.WriteCommandAfter(operationId, this, Transaction);
             }
         }
 
         protected override DbDataReader ExecuteDbDataReader(CommandBehavior behavior)
         {
             var operationId = DiagnosticSourceListener.WriteCommandBefore(this, Transaction);
-            Exception? e = null;
             try
             {
-                return _inner.ExecuteReader(behavior);
+                var result = _inner.ExecuteReader(behavior);
+                DiagnosticSourceListener.WriteCommandAfter(operationId, this, Transaction);
+                return result;
             }
             catch (Exception ex)
             {
-                e = ex;
+                DiagnosticSourceListener.WriteCommandError(operationId, this, Transaction, ex);
                 throw;
-            }
-            finally
-            {
-                if (e != null)
-                    DiagnosticSourceListener.WriteCommandError(operationId, this, Transaction, e);
-                else
-                    DiagnosticSourceListener.WriteCommandAfter(operationId, this, Transaction);
             }
         }
 
@@ -239,23 +209,17 @@ namespace Microsoft.Data.Diagnostics
             CancellationToken cancellationToken)
         {
             var operationId = DiagnosticSourceListener.WriteCommandBefore(this, Transaction);
-            Exception? e = null;
             try
             {
-                return await _inner.ExecuteReaderAsync(behavior, cancellationToken)
+                var result = await _inner.ExecuteReaderAsync(behavior, cancellationToken)
                     .ConfigureAwait(false);
+                DiagnosticSourceListener.WriteCommandAfter(operationId, this, Transaction);
+                return result;
             }
             catch (Exception ex)
             {
-                e = ex;
+                DiagnosticSourceListener.WriteCommandError(operationId, this, Transaction, ex);
                 throw;
-            }
-            finally
-            {
-                if (e != null)
-                    DiagnosticSourceListener.WriteCommandError(operationId, this, Transaction, e);
-                else
-                    DiagnosticSourceListener.WriteCommandAfter(operationId, this, Transaction);
             }
         }
     }
