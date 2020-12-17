@@ -59,7 +59,7 @@ namespace Microsoft.Data.Diagnostics
         internal Guid WriteCommandBefore(DbCommand command,
             DbTransaction? transaction, [CallerMemberName] string operation = "")
         {
-            var eventName = GetEventName(command.Connection, EventTypes.WriteCommandBefore);
+            var eventName = GetEventName(command.Connection, EventNames.WriteCommandBefore);
 
             if (!IsEnabled(eventName)) return Guid.Empty;
 
@@ -82,7 +82,7 @@ namespace Microsoft.Data.Diagnostics
         internal void WriteCommandAfter(Guid operationId, DbCommand command,
             DbTransaction? transaction, [CallerMemberName] string operation = "")
         {
-            var eventName = GetEventName(command.Connection, EventTypes.WriteCommandAfter);
+            var eventName = GetEventName(command.Connection, EventNames.WriteCommandAfter);
 
             if (IsEnabled(eventName))
                 Write(
@@ -101,7 +101,7 @@ namespace Microsoft.Data.Diagnostics
         internal void WriteCommandError(Guid operationId, DbCommand command,
             DbTransaction? transaction, Exception ex, [CallerMemberName] string operation = "")
         {
-            var eventName = GetEventName(command.Connection, EventTypes.WriteCommandError);
+            var eventName = GetEventName(command.Connection, EventNames.WriteCommandError);
 
             if (IsEnabled(eventName))
                 Write(
@@ -121,7 +121,7 @@ namespace Microsoft.Data.Diagnostics
         internal Guid WriteConnectionOpenBefore(DbConnection connection,
             [CallerMemberName] string operation = "")
         {
-            var eventName = GetEventName(connection, EventTypes.WriteConnectionOpenBefore);
+            var eventName = GetEventName(connection, EventNames.WriteConnectionOpenBefore);
 
             if (!IsEnabled(eventName)) return Guid.Empty;
 
@@ -144,7 +144,7 @@ namespace Microsoft.Data.Diagnostics
         internal void WriteConnectionOpenAfter(Guid operationId,
             DbConnection connection, [CallerMemberName] string operation = "")
         {
-            var eventName = GetEventName(connection, EventTypes.WriteConnectionOpenAfter);
+            var eventName = GetEventName(connection, EventNames.WriteConnectionOpenAfter);
 
             if (IsEnabled(eventName))
                 Write(
@@ -163,7 +163,7 @@ namespace Microsoft.Data.Diagnostics
         internal void WriteConnectionOpenError(Guid operationId,
             DbConnection connection, Exception ex, [CallerMemberName] string operation = "")
         {
-            var eventName = GetEventName(connection, EventTypes.WriteConnectionOpenError);
+            var eventName = GetEventName(connection, EventNames.WriteConnectionOpenError);
 
             if (IsEnabled(eventName))
                 Write(
@@ -183,7 +183,7 @@ namespace Microsoft.Data.Diagnostics
         internal Guid WriteConnectionCloseBefore(DbConnection connection,
             [CallerMemberName] string operation = "")
         {
-            var eventName = GetEventName(connection, EventTypes.WriteConnectionCloseBefore);
+            var eventName = GetEventName(connection, EventNames.WriteConnectionCloseBefore);
 
             if (!IsEnabled(eventName)) return Guid.Empty;
 
@@ -206,7 +206,7 @@ namespace Microsoft.Data.Diagnostics
         internal void WriteConnectionCloseAfter(Guid operationId, DbConnection connection,
             [CallerMemberName] string operation = "")
         {
-            var eventName = GetEventName(connection, EventTypes.WriteConnectionCloseAfter);
+            var eventName = GetEventName(connection, EventNames.WriteConnectionCloseAfter);
 
             if (IsEnabled(eventName))
                 Write(
@@ -224,7 +224,7 @@ namespace Microsoft.Data.Diagnostics
         internal void WriteConnectionCloseError(Guid operationId, DbConnection connection, Exception ex,
             [CallerMemberName] string operation = "")
         {
-            var eventName = GetEventName(connection, EventTypes.WriteConnectionCloseError);
+            var eventName = GetEventName(connection, EventNames.WriteConnectionCloseError);
 
             if (IsEnabled(eventName))
                 Write(
@@ -243,7 +243,7 @@ namespace Microsoft.Data.Diagnostics
         internal Guid WriteTransactionCommitBefore(IsolationLevel isolationLevel,
             DbConnection connection, DbTransaction transaction, [CallerMemberName] string operation = "")
         {
-            var eventName = GetEventName(connection, EventTypes.WriteTransactionCommitBefore);
+            var eventName = GetEventName(connection, EventNames.WriteTransactionCommitBefore);
 
             if (!IsEnabled(eventName)) return Guid.Empty;
 
@@ -268,7 +268,7 @@ namespace Microsoft.Data.Diagnostics
             IsolationLevel isolationLevel, DbConnection connection, DbTransaction transaction,
             [CallerMemberName] string operation = "")
         {
-            var eventName = GetEventName(connection, EventTypes.WriteTransactionCommitAfter);
+            var eventName = GetEventName(connection, EventNames.WriteTransactionCommitAfter);
 
             if (IsEnabled(eventName))
                 Write(
@@ -288,7 +288,7 @@ namespace Microsoft.Data.Diagnostics
             IsolationLevel isolationLevel, DbConnection connection, DbTransaction transaction, Exception ex,
             [CallerMemberName] string operation = "")
         {
-            var eventName = GetEventName(connection, EventTypes.WriteTransactionCommitError);
+            var eventName = GetEventName(connection, EventNames.WriteTransactionCommitError);
 
             if (IsEnabled(eventName))
                 Write(
@@ -309,7 +309,7 @@ namespace Microsoft.Data.Diagnostics
             IsolationLevel isolationLevel, DbConnection connection, DbTransaction transaction,
             [CallerMemberName] string operation = "")
         {
-            var eventName = GetEventName(connection, EventTypes.WriteTransactionRollbackBefore);
+            var eventName = GetEventName(connection, EventNames.WriteTransactionRollbackBefore);
 
             if (!IsEnabled(eventName)) return Guid.Empty;
 
@@ -333,7 +333,7 @@ namespace Microsoft.Data.Diagnostics
             IsolationLevel isolationLevel, DbConnection connection, DbTransaction transaction,
             [CallerMemberName] string operation = "")
         {
-            var eventName = GetEventName(connection, EventTypes.WriteTransactionRollbackAfter);
+            var eventName = GetEventName(connection, EventNames.WriteTransactionRollbackAfter);
 
             if (IsEnabled(eventName))
                 Write(
@@ -353,7 +353,7 @@ namespace Microsoft.Data.Diagnostics
             IsolationLevel isolationLevel, DbConnection connection, DbTransaction transaction, Exception ex,
             [CallerMemberName] string operation = "")
         {
-            var eventName = GetEventName(connection, EventTypes.WriteTransactionRollbackError);
+            var eventName = GetEventName(connection, EventNames.WriteTransactionRollbackError);
 
             if (IsEnabled(eventName))
                 Write(
