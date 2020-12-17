@@ -36,7 +36,7 @@ namespace Microsoft.Data.Diagnostics
         internal static DbConnection GetUnderlying(this DbConnection connection)
         {
             if (connection == null) throw new ArgumentNullException(nameof(connection));
-            
+
             return connection is DiagnosedDbConnection diagnosed ? diagnosed.Inner : connection;
         }
 
@@ -44,7 +44,7 @@ namespace Microsoft.Data.Diagnostics
         {
             byte[] guidData = new byte[16];
             var connectionHashCode = connection.GetHashCode();
-           // var connectionStringHashCode = 
+            // var connectionStringHashCode = 
             Array.Copy(BitConverter.GetBytes(connectionHashCode), guidData, sizeof(int));
             return new Guid(guidData);
         }

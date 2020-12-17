@@ -13,43 +13,41 @@ namespace Microsoft.Data.Diagnostics
     {
         private static readonly DbDiagnosticSource DiagnosticSourceListener = new DbDiagnosticSource();
 
-        private readonly DbConnection _inner;
-
         public DiagnosedDbConnection(DbConnection inner)
         {
-            _inner = inner ?? throw new ArgumentNullException(nameof(inner));
+            Inner = inner ?? throw new ArgumentNullException(nameof(inner));
         }
 
-        public override int ConnectionTimeout => _inner.ConnectionTimeout;
+        public override int ConnectionTimeout => Inner.ConnectionTimeout;
 
-        internal DbConnection Inner => _inner;
+        internal DbConnection Inner { get; }
 
         public override ISite Site
         {
-            get => _inner.Site;
-            set => _inner.Site = value;
+            get => Inner.Site;
+            set => Inner.Site = value;
         }
 
         public override string ConnectionString
         {
-            get => _inner.ConnectionString;
-            set => _inner.ConnectionString = value;
+            get => Inner.ConnectionString;
+            set => Inner.ConnectionString = value;
         }
 
-        public override string Database => _inner.Database;
+        public override string Database => Inner.Database;
 
-        public override ConnectionState State => _inner.State;
+        public override ConnectionState State => Inner.State;
 
-        public override string? DataSource => _inner.DataSource;
+        public override string? DataSource => Inner.DataSource;
 
-        public override string? ServerVersion => _inner.ServerVersion;
+        public override string? ServerVersion => Inner.ServerVersion;
 
         public override void Close()
         {
             var operationId = DiagnosticSourceListener.WriteConnectionCloseBefore(this);
             try
             {
-                _inner.Close();
+                Inner.Close();
                 DiagnosticSourceListener.WriteConnectionCloseAfter(operationId, this);
             }
             catch (Exception ex)
@@ -64,7 +62,7 @@ namespace Microsoft.Data.Diagnostics
             var operationId = DiagnosticSourceListener.WriteConnectionCloseBefore(this);
             try
             {
-                await _inner.CloseAsync().ConfigureAwait(false);
+                await Inner.CloseAsync().ConfigureAwait(false);
                 DiagnosticSourceListener.WriteConnectionCloseAfter(operationId, this);
             }
             catch (Exception ex)
@@ -79,7 +77,7 @@ namespace Microsoft.Data.Diagnostics
             var operationId = DiagnosticSourceListener.WriteConnectionOpenBefore(this);
             try
             {
-                _inner.Open();
+                Inner.Open();
                 DiagnosticSourceListener.WriteConnectionOpenAfter(operationId, this);
             }
             catch (Exception ex)
@@ -94,7 +92,7 @@ namespace Microsoft.Data.Diagnostics
             var operationId = DiagnosticSourceListener.WriteConnectionOpenBefore(this);
             try
             {
-                await _inner.OpenAsync(cancellationToken).ConfigureAwait(false);
+                await Inner.OpenAsync(cancellationToken).ConfigureAwait(false);
                 DiagnosticSourceListener.WriteConnectionOpenAfter(operationId, this);
             }
             catch (Exception ex)
@@ -106,74 +104,74 @@ namespace Microsoft.Data.Diagnostics
 
         public override void EnlistTransaction(Transaction transaction)
         {
-            _inner.EnlistTransaction(transaction);
+            Inner.EnlistTransaction(transaction);
         }
 
         public override DataTable GetSchema()
         {
-            return _inner.GetSchema();
+            return Inner.GetSchema();
         }
 
         public override DataTable GetSchema(string collectionName)
         {
-            return _inner.GetSchema(collectionName);
+            return Inner.GetSchema(collectionName);
         }
 
         public override DataTable GetSchema(string collectionName, string[] restrictionValues)
         {
-            return _inner.GetSchema(collectionName, restrictionValues);
+            return Inner.GetSchema(collectionName, restrictionValues);
         }
 
         public override object? InitializeLifetimeService()
         {
-            return _inner.InitializeLifetimeService();
+            return Inner.InitializeLifetimeService();
         }
 
         public override string ToString()
         {
-            return _inner.ToString();
+            return Inner.ToString();
         }
 
         public override bool Equals(object? obj)
         {
-            return ReferenceEquals(this, obj) || _inner.Equals(obj);
+            return ReferenceEquals(this, obj) || Inner.Equals(obj);
         }
 
         public override int GetHashCode()
         {
-            return _inner.GetHashCode();
+            return Inner.GetHashCode();
         }
 
         public override void ChangeDatabase(string databaseName)
         {
-            _inner.ChangeDatabase(databaseName);
+            Inner.ChangeDatabase(databaseName);
         }
 
         public override event StateChangeEventHandler StateChange
         {
-            add => _inner.StateChange += value;
-            remove => _inner.StateChange -= value;
+            add => Inner.StateChange += value;
+            remove => Inner.StateChange -= value;
         }
 
         protected override DbCommand CreateDbCommand()
         {
-            return _inner.CreateCommand().AddDiagnosting();
+            return Inner.CreateCommand().AddDiagnosting();
         }
 
         protected override DbTransaction BeginDbTransaction(IsolationLevel isolationLevel)
         {
-            return _inner.BeginTransaction(isolationLevel).AddDiagnosting();
+            return Inner.BeginTransaction(isolationLevel).AddDiagnosting();
         }
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing) _inner.Dispose();
+            if (disposing) Inner.Dispose();
         }
 
         protected override async ValueTask<DbTransaction> BeginDbTransactionAsync(IsolationLevel isolationLevel,
             CancellationToken cancellationToken)
         {
-            var transaction = await _inner.BeginTransactionAsync(isolationLevel, cancellationToken)
+            var transaction = await Inner.BeginTransactionAsync(isolationLevel, cancellationToken)
                 .ConfigureAwait(false);
             return transaction.AddDiagnosting();
         }

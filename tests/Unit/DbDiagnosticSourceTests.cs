@@ -78,7 +78,7 @@ namespace Byndyusoft.Data.Relational.Diagnostics.Tests.Unit
         public void AddEventsPrefix_UpdatesOne()
         {
             // arrange
-            var connectionType = typeof(SqlConnection); 
+            var connectionType = typeof(SqlConnection);
             using var revert = DbDiagnosticSource.AddEventsPrefix(connectionType, "prefix");
 
             // act
@@ -125,14 +125,11 @@ namespace Byndyusoft.Data.Relational.Diagnostics.Tests.Unit
             var connection = Mock.Of<DbConnection>();
             var source = new DbDiagnosticSource();
 
-            Guid operationId = Guid.Empty;
+            var operationId = Guid.Empty;
 
             // act
             var (eventName, payload) = DbDiagnosticSession.Execute(source,
-                () =>
-                {
-                    operationId = source.WriteConnectionOpenBefore(connection, "operation");
-                });
+                () => { operationId = source.WriteConnectionOpenBefore(connection, "operation"); });
 
             // assert
             Assert.Equal(DbDiagnosticSource.GetEventName(connection.GetType(), "WriteConnectionOpenBefore"), eventName);
@@ -209,17 +206,15 @@ namespace Byndyusoft.Data.Relational.Diagnostics.Tests.Unit
             // arrange
             var connection = Mock.Of<DbConnection>();
             var source = new DbDiagnosticSource();
-            Guid operationId = Guid.Empty;
+            var operationId = Guid.Empty;
 
             // act
             var (eventName, payload) = DbDiagnosticSession.Execute(source,
-                () =>
-                {
-                    operationId = source.WriteConnectionCloseBefore(connection, "operation");
-                });
+                () => { operationId = source.WriteConnectionCloseBefore(connection, "operation"); });
 
             // assert
-            Assert.Equal(DbDiagnosticSource.GetEventName(connection.GetType(), "WriteConnectionCloseBefore"), eventName);
+            Assert.Equal(DbDiagnosticSource.GetEventName(connection.GetType(), "WriteConnectionCloseBefore"),
+                eventName);
             var connectionPayload = Assert.IsType<ConnectionPayload>(payload);
             Assert.Equal(connection, connectionPayload.Connection);
             Assert.Equal(connection.GetId(), connectionPayload.ConnectionId);
@@ -262,7 +257,7 @@ namespace Byndyusoft.Data.Relational.Diagnostics.Tests.Unit
             // act
             var (eventName, payload) = DbDiagnosticSession.Execute(source,
                 () => { source.WriteConnectionCloseError(operationId, connection, exception, "operation"); });
-            
+
             // assert
             Assert.Equal(DbDiagnosticSource.GetEventName(connection.GetType(), "WriteConnectionCloseError"), eventName);
             var connectionPayload = Assert.IsType<ConnectionPayload>(payload);
@@ -298,14 +293,11 @@ namespace Byndyusoft.Data.Relational.Diagnostics.Tests.Unit
             Mock.Get(command).Protected().SetupGet<DbConnection>("DbConnection").Returns(connection);
             var transaction = Mock.Of<DbTransaction>();
             var source = new DbDiagnosticSource();
-            Guid operationId = Guid.Empty;
+            var operationId = Guid.Empty;
 
             // act
             var (eventName, payload) = DbDiagnosticSession.Execute(source,
-                () =>
-                {
-                    operationId = source.WriteCommandBefore(command, transaction, "operation");
-                });
+                () => { operationId = source.WriteCommandBefore(command, transaction, "operation"); });
 
             // assert
             Assert.Equal(DbDiagnosticSource.GetEventName(connection.GetType(), "WriteCommandBefore"), eventName);
@@ -395,17 +387,19 @@ namespace Byndyusoft.Data.Relational.Diagnostics.Tests.Unit
             var connection = Mock.Of<DbConnection>();
             var transaction = Mock.Of<DbTransaction>();
             var source = new DbDiagnosticSource();
-            Guid operationId = Guid.Empty;
+            var operationId = Guid.Empty;
 
             // act
             var (eventName, payload) = DbDiagnosticSession.Execute(source,
                 () =>
                 {
-                    operationId = source.WriteTransactionCommitBefore(isolationLevel, connection, transaction, "operation");
+                    operationId =
+                        source.WriteTransactionCommitBefore(isolationLevel, connection, transaction, "operation");
                 });
 
             // assert
-            Assert.Equal(DbDiagnosticSource.GetEventName(connection.GetType(), "WriteTransactionCommitBefore"), eventName);
+            Assert.Equal(DbDiagnosticSource.GetEventName(connection.GetType(), "WriteTransactionCommitBefore"),
+                eventName);
             var transactionPayload = Assert.IsType<TransactionPayload>(payload);
             Assert.Equal(transaction.GetId(), transactionPayload.TransactionId);
             Assert.Equal(connection, transactionPayload.Connection);
@@ -429,11 +423,13 @@ namespace Byndyusoft.Data.Relational.Diagnostics.Tests.Unit
             var (eventName, payload) = DbDiagnosticSession.Execute(source,
                 () =>
                 {
-                    source.WriteTransactionCommitAfter(operationId, isolationLevel, connection, transaction, "operation");
+                    source.WriteTransactionCommitAfter(operationId, isolationLevel, connection, transaction,
+                        "operation");
                 });
 
             // assert
-            Assert.Equal(DbDiagnosticSource.GetEventName(connection.GetType(), "WriteTransactionCommitAfter"), eventName);
+            Assert.Equal(DbDiagnosticSource.GetEventName(connection.GetType(), "WriteTransactionCommitAfter"),
+                eventName);
             var transactionPayload = Assert.IsType<TransactionPayload>(payload);
             Assert.Equal(transaction.GetId(), transactionPayload.TransactionId);
             Assert.Equal(connection, transactionPayload.Connection);
@@ -458,11 +454,13 @@ namespace Byndyusoft.Data.Relational.Diagnostics.Tests.Unit
             var (eventName, payload) = DbDiagnosticSession.Execute(source,
                 () =>
                 {
-                    source.WriteTransactionCommitError(operationId, isolationLevel, connection, transaction, exception, "operation");
+                    source.WriteTransactionCommitError(operationId, isolationLevel, connection, transaction, exception,
+                        "operation");
                 });
 
             // assert
-            Assert.Equal(DbDiagnosticSource.GetEventName(connection.GetType(), "WriteTransactionCommitError"), eventName);
+            Assert.Equal(DbDiagnosticSource.GetEventName(connection.GetType(), "WriteTransactionCommitError"),
+                eventName);
             var transactionPayload = Assert.IsType<TransactionPayload>(payload);
             Assert.Equal(transaction.GetId(), transactionPayload.TransactionId);
             Assert.Equal(connection, transactionPayload.Connection);
@@ -482,7 +480,8 @@ namespace Byndyusoft.Data.Relational.Diagnostics.Tests.Unit
             var source = new DbDiagnosticSource();
 
             // act
-            var operationId = source.WriteTransactionRollbackBefore(isolationLevel, connection, transaction, "operation");
+            var operationId =
+                source.WriteTransactionRollbackBefore(isolationLevel, connection, transaction, "operation");
 
             // assert
             Assert.Equal(Guid.Empty, operationId);
@@ -496,17 +495,19 @@ namespace Byndyusoft.Data.Relational.Diagnostics.Tests.Unit
             var connection = Mock.Of<DbConnection>();
             var transaction = Mock.Of<DbTransaction>();
             var source = new DbDiagnosticSource();
-            Guid operationId = Guid.Empty;
+            var operationId = Guid.Empty;
 
             // act
             var (eventName, payload) = DbDiagnosticSession.Execute(source,
                 () =>
                 {
-                    operationId = source.WriteTransactionRollbackBefore(isolationLevel, connection, transaction, "operation");
+                    operationId =
+                        source.WriteTransactionRollbackBefore(isolationLevel, connection, transaction, "operation");
                 });
 
             // assert
-            Assert.Equal(DbDiagnosticSource.GetEventName(connection.GetType(), "WriteTransactionRollbackBefore"), eventName);
+            Assert.Equal(DbDiagnosticSource.GetEventName(connection.GetType(), "WriteTransactionRollbackBefore"),
+                eventName);
             var transactionPayload = Assert.IsType<TransactionPayload>(payload);
             Assert.Equal(transaction.GetId(), transactionPayload.TransactionId);
             Assert.Equal(connection, transactionPayload.Connection);
@@ -530,11 +531,13 @@ namespace Byndyusoft.Data.Relational.Diagnostics.Tests.Unit
             var (eventName, payload) = DbDiagnosticSession.Execute(source,
                 () =>
                 {
-                    source.WriteTransactionRollbackAfter(operationId, isolationLevel, connection, transaction, "operation");
+                    source.WriteTransactionRollbackAfter(operationId, isolationLevel, connection, transaction,
+                        "operation");
                 });
 
             // assert
-            Assert.Equal(DbDiagnosticSource.GetEventName(connection.GetType(), "WriteTransactionRollbackAfter"), eventName);
+            Assert.Equal(DbDiagnosticSource.GetEventName(connection.GetType(), "WriteTransactionRollbackAfter"),
+                eventName);
             var transactionPayload = Assert.IsType<TransactionPayload>(payload);
             Assert.Equal(transaction.GetId(), transactionPayload.TransactionId);
             Assert.Equal(connection, transactionPayload.Connection);
@@ -559,11 +562,13 @@ namespace Byndyusoft.Data.Relational.Diagnostics.Tests.Unit
             var (eventName, payload) = DbDiagnosticSession.Execute(source,
                 () =>
                 {
-                    source.WriteTransactionRollbackError(operationId, isolationLevel, connection, transaction, exception, "operation");
+                    source.WriteTransactionRollbackError(operationId, isolationLevel, connection, transaction,
+                        exception, "operation");
                 });
 
             // assert
-            Assert.Equal(DbDiagnosticSource.GetEventName(connection.GetType(), "WriteTransactionRollbackError"), eventName);
+            Assert.Equal(DbDiagnosticSource.GetEventName(connection.GetType(), "WriteTransactionRollbackError"),
+                eventName);
             var transactionPayload = Assert.IsType<TransactionPayload>(payload);
             Assert.Equal(transaction.GetId(), transactionPayload.TransactionId);
             Assert.Equal(connection, transactionPayload.Connection);

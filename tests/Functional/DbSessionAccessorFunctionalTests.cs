@@ -15,8 +15,8 @@ namespace Byndyusoft.Data.Relational.Diagnostics.Tests.Functional
 {
     public class DbSessionAccessorFunctionalTests : IAsyncLifetime
     {
-        private string _connectionString = "Data Source=queries.db";
-        
+        private readonly string _connectionString = "Data Source=queries.db";
+
         public async Task InitializeAsync()
         {
             File.Delete("queries.db");
@@ -116,24 +116,23 @@ namespace Byndyusoft.Data.Relational.Diagnostics.Tests.Functional
             }
         }
 
-        private sealed class Observer : 
+        private sealed class Observer :
             IObserver<DiagnosticListener>,
             IObserver<KeyValuePair<string, object>>
         {
             private readonly List<IDisposable> _subscriptions = new List<IDisposable>();
 
-            public List<KeyValuePair<string, object>> Events = new List<KeyValuePair<string, object>>();
+            public readonly List<KeyValuePair<string, object>> Events = new List<KeyValuePair<string, object>>();
 
             void IObserver<DiagnosticListener>.OnNext(DiagnosticListener diagnosticListener)
             {
                 if (diagnosticListener.Name == nameof(DbDiagnosticSource))
-                {
                     _subscriptions.Add(diagnosticListener.Subscribe(this));
-                }
             }
 
             void IObserver<DiagnosticListener>.OnError(Exception error)
-            { }
+            {
+            }
 
             void IObserver<DiagnosticListener>.OnCompleted()
             {
@@ -142,10 +141,12 @@ namespace Byndyusoft.Data.Relational.Diagnostics.Tests.Functional
             }
 
             void IObserver<KeyValuePair<string, object>>.OnCompleted()
-            { }
+            {
+            }
 
             void IObserver<KeyValuePair<string, object>>.OnError(Exception error)
-            { }
+            {
+            }
 
             void IObserver<KeyValuePair<string, object>>.OnNext(KeyValuePair<string, object> value)
             {

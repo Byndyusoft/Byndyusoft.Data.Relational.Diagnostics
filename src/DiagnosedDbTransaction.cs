@@ -51,7 +51,8 @@ namespace Microsoft.Data.Diagnostics
             }
             catch (Exception ex)
             {
-                DiagnosticSourceListener.WriteTransactionRollbackError(operationId, IsolationLevel, Connection, this, ex);
+                DiagnosticSourceListener.WriteTransactionRollbackError(operationId, IsolationLevel, Connection, this,
+                    ex);
                 throw;
             }
         }
@@ -108,7 +109,8 @@ namespace Microsoft.Data.Diagnostics
             }
             catch (Exception ex)
             {
-                DiagnosticSourceListener.WriteTransactionRollbackError(operationId, IsolationLevel, Connection, this, ex);
+                DiagnosticSourceListener.WriteTransactionRollbackError(operationId, IsolationLevel, Connection, this,
+                    ex);
                 throw;
             }
         }
