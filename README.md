@@ -1,13 +1,58 @@
 [![(License)](https://img.shields.io/github/license/Byndyusoft/Byndyusoft.Data.Relational.Diagnostics.svg)](LICENSE.txt)
 [![Nuget](http://img.shields.io/nuget/v/Byndyusoft.Data.Relational.Diagnostics.svg?maxAge=10800)](https://www.nuget.org/packages/Byndyusoft.Data.Relational.Diagnostics/) [![NuGet downloads](https://img.shields.io/nuget/dt/Byndyusoft.Data.Relational.Diagnostics.svg)](https://www.nuget.org/packages/Byndyusoft.Data.Relational.Diagnostics/) 
 
+# Usage
+
+You can enabled `DbConnection` diagnosting by calling `AddDiagnosting()` extension method over it.
+
+```csharp
+await using var connection = new NpgsqlConnection(connectionString).AddDiagnosting();
+```
+
+Here is a simple diagnostic listener:
+
+```csharp
+private sealed class Observer :
+		IObserver<DiagnosticListener>,
+		IObserver<KeyValuePair<string, object>>
+{
+	private readonly List<IDisposable> _subscriptions = new List<IDisposable>();
+
+	void IObserver<DiagnosticListener>.OnNext(DiagnosticListener diagnosticListener)
+	{
+		if (diagnosticListener.Name == nameof(DbDiagnosticSource))
+			_subscriptions.Add(diagnosticListener.Subscribe(this));
+	}
+
+	void IObserver<DiagnosticListener>.OnError(Exception error) { }
+
+	void IObserver<DiagnosticListener>.OnCompleted()
+	{
+		_subscriptions.ForEach(x => x.Dispose());
+		_subscriptions.Clear();
+	}
+
+	void IObserver<KeyValuePair<string, object>>.OnCompleted() { }
+
+	public void OnError(Exception error) { }
+
+	void IObserver<KeyValuePair<string, object>>.OnNext(KeyValuePair<string, object> value) =>
+		Console.WriteLine(value);
+}
+```
+
+Next you can consume diagnostic events. You can read more at [DiagnosticSourceUsersGuide](https://github.com/dotnet/runtime/blob/master/src/libraries/System.Diagnostics.DiagnosticSource/src/DiagnosticSourceUsersGuide.md).
+
+```
+var observer = new Observer();
+using var subscription = DiagnosticListener.AllListeners.Subscribe(observer);
+```
 
 ## Installing
 
 ```shell
 dotnet add package Byndyusoft.Data.Relational.Diagnostics
 ```
-
 
 # Contributing
 
