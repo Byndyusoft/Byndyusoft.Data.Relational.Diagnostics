@@ -25,7 +25,7 @@ namespace Microsoft.Data.Diagnostics
                 {
                     OperationId = operationId,
                     Operation = operation,
-                    ConnectionId = command.Connection.GetGuid(),
+                    ConnectionId = command.Connection!.GetGuid(),
                     Command = command,
                     TransactionId = transaction?.GetId(),
                     Timestamp = Stopwatch.GetTimestamp()
@@ -44,7 +44,7 @@ namespace Microsoft.Data.Diagnostics
                     {
                         OperationId = operationId,
                         Operation = operation,
-                        ConnectionId = command.Connection.GetGuid(),
+                        ConnectionId = command.Connection!.GetGuid(),
                         Command = command,
                         TransactionId = transaction?.GetId(),
                         Timestamp = Stopwatch.GetTimestamp()
@@ -61,7 +61,7 @@ namespace Microsoft.Data.Diagnostics
                     {
                         OperationId = operationId,
                         Operation = operation,
-                        ConnectionId = command.Connection.GetGuid(),
+                        ConnectionId = command.Connection!.GetGuid(),
                         Command = command,
                         TransactionId = transaction?.GetId(),
                         Exception = ex,

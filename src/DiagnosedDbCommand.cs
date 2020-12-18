@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Data;
 using System.Data.Common;
 using System.Threading;
@@ -40,10 +39,10 @@ namespace Microsoft.Data.Diagnostics
             set => Inner.UpdatedRowSource = value;
         }
 
-        protected override DbConnection DbConnection
+        protected override DbConnection? DbConnection
         {
-            get => Inner.Connection.Unwrap();
-            set => Inner.Connection = value.Unwrap();
+            get => Inner.Connection!.Unwrap();
+            set => Inner.Connection = value?.Unwrap();
         }
 
         protected override DbParameterCollection DbParameterCollection => Inner.Parameters;
@@ -58,12 +57,6 @@ namespace Microsoft.Data.Diagnostics
         {
             get => Inner.DesignTimeVisible;
             set => Inner.DesignTimeVisible = value;
-        }
-
-        public override ISite Site
-        {
-            get => Inner.Site;
-            set => Inner.Site = value;
         }
 
         internal DbCommand Inner { get; }
@@ -88,15 +81,6 @@ namespace Microsoft.Data.Diagnostics
             return Inner.ToString();
         }
 
-#if NETCOREAPP
-        public override object InitializeLifetimeService()
-#else
-        public override object? InitializeLifetimeService()
-#endif
-        {
-            return Inner.InitializeLifetimeService();
-        }
-
         public override bool Equals(object? obj)
         {
             return ReferenceEquals(this, obj) || Inner.Equals(obj);
@@ -110,11 +94,6 @@ namespace Microsoft.Data.Diagnostics
         protected override void Dispose(bool disposing)
         {
             if (disposing) Inner.Dispose();
-        }
-
-        protected override object GetService(Type service)
-        {
-            return Inner.Site.GetService(service);
         }
 
         public override async Task<int> ExecuteNonQueryAsync(CancellationToken cancellationToken)
@@ -134,7 +113,7 @@ namespace Microsoft.Data.Diagnostics
             }
         }
 
-        public override async Task<object> ExecuteScalarAsync(CancellationToken cancellationToken)
+        public override async Task<object?> ExecuteScalarAsync(CancellationToken cancellationToken)
         {
             var operationId = DiagnosticListenerListener.OnCommandExecuting(this, Transaction);
             try
@@ -167,7 +146,7 @@ namespace Microsoft.Data.Diagnostics
             }
         }
 
-        public override object ExecuteScalar()
+        public override object? ExecuteScalar()
         {
             var operationId = DiagnosticListenerListener.OnCommandExecuting(this, Transaction);
             try

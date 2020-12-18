@@ -11,8 +11,11 @@ namespace Byndyusoft.Data.Relational.Diagnostics.Tests.Unit
         [Fact]
         public void AddDiagnosting_NullConnection_ThrowsException()
         {
+            // arrange
+            DbConnection connection = null!;
+
             // act
-            var exception = Assert.Throws<ArgumentNullException>(() => ((DbConnection) null).AddDiagnosting());
+            var exception = Assert.Throws<ArgumentNullException>(() => connection.AddDiagnosting());
 
             // assert
             Assert.Equal("connection", exception.ParamName);
@@ -35,8 +38,11 @@ namespace Byndyusoft.Data.Relational.Diagnostics.Tests.Unit
         [Fact]
         public void AddDiagnosting_NullTransaction_ThrowsException()
         {
+            // arrange
+            DbTransaction transaction = null!;
+
             // act
-            var exception = Assert.Throws<ArgumentNullException>(() => ((DbTransaction) null).AddDiagnosting());
+            var exception = Assert.Throws<ArgumentNullException>(() => transaction.AddDiagnosting());
 
             // assert
             Assert.Equal("transaction", exception.ParamName);
@@ -59,8 +65,11 @@ namespace Byndyusoft.Data.Relational.Diagnostics.Tests.Unit
         [Fact]
         public void AddDiagnosting_NullCommand_ThrowsException()
         {
+            // arrange
+            DbCommand command = null!;
+
             // act
-            var exception = Assert.Throws<ArgumentNullException>(() => ((DbCommand) null).AddDiagnosting());
+            var exception = Assert.Throws<ArgumentNullException>(() => command.AddDiagnosting());
 
             // assert
             Assert.Equal("command", exception.ParamName);

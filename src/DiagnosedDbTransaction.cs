@@ -22,20 +22,11 @@ namespace Microsoft.Data.Diagnostics
 
         public override IsolationLevel IsolationLevel => Inner.IsolationLevel;
 
-        protected override DbConnection DbConnection => Inner.Connection.Unwrap();
-
-#if NETCOREAPP
-        public override object InitializeLifetimeService()
-#else
-        public override object? InitializeLifetimeService()
-#endif
-        {
-            return Inner.InitializeLifetimeService();
-        }
+        protected override DbConnection? DbConnection => Inner.Connection?.Unwrap();
 
         public override void Commit()
         {
-            var connection = Connection;
+            var connection = Connection!;
             var isolationLevel = IsolationLevel;
             var operationId = DiagnosticListenerListener.OnTransactionCommitting(isolationLevel, connection, this);
             try
@@ -53,7 +44,7 @@ namespace Microsoft.Data.Diagnostics
 
         public override void Rollback()
         {
-            var connection = Connection;
+            var connection = Connection!;
             var isolationLevel = IsolationLevel;
             var operationId = DiagnosticListenerListener.OnTransactionRollingBack(isolationLevel, connection, this);
             try
@@ -92,7 +83,7 @@ namespace Microsoft.Data.Diagnostics
 #if ADO_NET_ASYNC
         public override async Task CommitAsync(CancellationToken cancellationToken = default)
         {
-            var connection = Connection;
+            var connection = Connection!;
             var isolationLevel = IsolationLevel;
             var operationId = DiagnosticListenerListener.OnTransactionCommitting(isolationLevel, connection, this);
             try
@@ -114,18 +105,45 @@ namespace Microsoft.Data.Diagnostics
 
         public override async Task RollbackAsync(CancellationToken cancellationToken = default)
         {
-            var operationId = DiagnosticListenerListener.OnTransactionRollingBack(IsolationLevel, Connection, this);
+            var connection = Connection!;
+            var operationId = DiagnosticListenerListener.OnTransactionRollingBack(IsolationLevel, connection, this);
             try
             {
                 await Inner.RollbackAsync(cancellationToken).ConfigureAwait(false);
-                DiagnosticListenerListener.OnTransactionRolledBack(operationId, IsolationLevel, Connection, this);
+                DiagnosticListenerListener.OnTransactionRolledBack(operationId, IsolationLevel, connection, this);
             }
             catch (Exception ex)
             {
-                DiagnosticListenerListener.OnTransactionRollingBackError(operationId, IsolationLevel, Connection, this,
+                DiagnosticListenerListener.OnTransactionRollingBackError(operationId, IsolationLevel, connection, this,
                     ex);
                 throw;
             }
+        }
+
+#endif
+
+#if NET5_0
+
+        public override bool SupportsSavepoints => Inner.SupportsSavepoints;
+
+        public override void Release(string savepointName)
+        {
+            Inner.Release(savepointName);
+        }
+
+        public override Task ReleaseAsync(string savepointName, CancellationToken cancellationToken = default)
+        {
+            return Inner.ReleaseAsync(savepointName, cancellationToken);
+        }
+
+        public override void Save(string savepointName)
+        {
+            Inner.Save(savepointName);
+        }
+
+        public override Task SaveAsync(string savepointName, CancellationToken cancellationToken = default)
+        {
+            return Inner.SaveAsync(savepointName, cancellationToken);
         }
 
 #endif

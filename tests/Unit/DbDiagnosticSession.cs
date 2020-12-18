@@ -6,20 +6,20 @@ namespace Byndyusoft.Data.Relational.Diagnostics.Tests.Unit
 {
     public static class DbDiagnosticSession
     {
-        public static (string eventName, object payload) Execute(DbDiagnosticListener listener, Action action)
+        public static (string eventName, object? payload) Execute(DbDiagnosticListener listener, Action action)
         {
-            string eventName = null;
-            object payload = null;
+            string eventName = null!;
+            object? payload = null;
             using var observer = listener.Subscribe(new Observer(pair => (eventName, payload) = pair));
             action();
             return (eventName, payload);
         }
 
-        private class Observer : IObserver<KeyValuePair<string, object>>
+        private class Observer : IObserver<KeyValuePair<string, object?>>
         {
-            private readonly Action<KeyValuePair<string, object>> _onNext;
+            private readonly Action<KeyValuePair<string, object?>>? _onNext;
 
-            public Observer(Action<KeyValuePair<string, object>> onNext = null)
+            public Observer(Action<KeyValuePair<string, object?>>? onNext = null)
             {
                 _onNext = onNext;
             }
@@ -32,9 +32,9 @@ namespace Byndyusoft.Data.Relational.Diagnostics.Tests.Unit
             {
             }
 
-            public void OnNext(KeyValuePair<string, object> value)
+            public void OnNext(KeyValuePair<string, object?> value)
             {
-                _onNext.Invoke(value);
+                _onNext?.Invoke(value);
             }
         }
     }
