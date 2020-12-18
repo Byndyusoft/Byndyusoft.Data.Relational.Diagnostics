@@ -3,13 +3,13 @@
 
 # Usage
 
-You can enabled `DbConnection` diagnosting by calling `AddDiagnosting()` extension method over it.
+You can enable `DbConnection` diagnosting by calling `AddDiagnosting()` extension method over it.
 
 ```csharp
 await using var connection = new NpgsqlConnection(connectionString).AddDiagnosting();
 ```
 
-Here is a simple diagnostic listener:
+Here is a simple diagnostic observer:
 
 ```csharp
 private sealed class Observer :

@@ -9,9 +9,9 @@ using IsolationLevel = System.Data.IsolationLevel;
 
 namespace Microsoft.Data.Diagnostics
 {
-    public class DiagnosedDbConnection : DbConnection
+    internal class DiagnosedDbConnection : DbConnection
     {
-        private static readonly DbDiagnosticSource DiagnosticSourceListener = new DbDiagnosticSource();
+        private static readonly DbDiagnosticListener DiagnosticListenerListener = new DbDiagnosticListener();
 
         public DiagnosedDbConnection(DbConnection inner)
         {
@@ -44,45 +44,45 @@ namespace Microsoft.Data.Diagnostics
 
         public override void Close()
         {
-            var operationId = DiagnosticSourceListener.WriteConnectionCloseBefore(this);
+            var operationId = DiagnosticListenerListener.OnConnectionClosing(this);
             try
             {
                 Inner.Close();
-                DiagnosticSourceListener.WriteConnectionCloseAfter(operationId, this);
+                DiagnosticListenerListener.OnConnectionClosed(operationId, this);
             }
             catch (Exception ex)
             {
-                DiagnosticSourceListener.WriteConnectionCloseError(operationId, this, ex);
+                DiagnosticListenerListener.OmConnectionClosingError(operationId, this, ex);
                 throw;
             }
         }
 
         public override void Open()
         {
-            var operationId = DiagnosticSourceListener.WriteConnectionOpenBefore(this);
+            var operationId = DiagnosticListenerListener.OnConnectionOpening(this);
             try
             {
                 Inner.Open();
-                DiagnosticSourceListener.WriteConnectionOpenAfter(operationId, this);
+                DiagnosticListenerListener.OnConnectionOpened(operationId, this);
             }
             catch (Exception ex)
             {
-                DiagnosticSourceListener.WriteConnectionOpenError(operationId, this, ex);
+                DiagnosticListenerListener.OnConnectionOpeningError(operationId, this, ex);
                 throw;
             }
         }
 
         public override async Task OpenAsync(CancellationToken cancellationToken)
         {
-            var operationId = DiagnosticSourceListener.WriteConnectionOpenBefore(this);
+            var operationId = DiagnosticListenerListener.OnConnectionOpening(this);
             try
             {
                 await Inner.OpenAsync(cancellationToken).ConfigureAwait(false);
-                DiagnosticSourceListener.WriteConnectionOpenAfter(operationId, this);
+                DiagnosticListenerListener.OnConnectionOpened(operationId, this);
             }
             catch (Exception ex)
             {
-                DiagnosticSourceListener.WriteConnectionOpenError(operationId, this, ex);
+                DiagnosticListenerListener.OnConnectionOpeningError(operationId, this, ex);
                 throw;
             }
         }
@@ -158,7 +158,6 @@ namespace Microsoft.Data.Diagnostics
         }
 
 #if ADO_NET_ASYNC
-
         protected override async ValueTask<DbTransaction> BeginDbTransactionAsync(IsolationLevel isolationLevel,
             CancellationToken cancellationToken)
         {
@@ -169,15 +168,15 @@ namespace Microsoft.Data.Diagnostics
 
          public override async Task CloseAsync()
         {
-            var operationId = DiagnosticSourceListener.WriteConnectionCloseBefore(this);
+            var operationId = DiagnosticListenerListener.OnConnectionClosing(this);
             try
             {
                 await Inner.CloseAsync().ConfigureAwait(false);
-                DiagnosticSourceListener.WriteConnectionCloseAfter(operationId, this);
+                DiagnosticListenerListener.OnConnectionClosed(operationId, this);
             }
             catch (Exception ex)
             {
-                DiagnosticSourceListener.WriteConnectionCloseError(operationId, this, ex);
+                DiagnosticListenerListener.OmConnectionClosingError(operationId, this, ex);
                 throw;
             }
         }

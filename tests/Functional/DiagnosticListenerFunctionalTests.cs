@@ -8,12 +8,11 @@ using System.Threading.Tasks;
 using Dapper;
 using Microsoft.Data.Diagnostics;
 using Microsoft.Data.Diagnostics.Payloads;
-using Microsoft.Data.Sqlite;
 using Xunit;
 
 namespace Byndyusoft.Data.Relational.Diagnostics.Tests.Functional
 {
-    public class DbDiagnosticSourceFunctionalTests : IAsyncLifetime
+    public class DiagnosticListenerFunctionalTests : IAsyncLifetime
     {
         private readonly string _connectionString = "Data Source=queries.db";
 
@@ -21,7 +20,7 @@ namespace Byndyusoft.Data.Relational.Diagnostics.Tests.Functional
         {
             File.Delete("queries.db");
 
-            await using var connection = new SqliteConnection(_connectionString);
+            await using var connection = new SQLiteConnection(_connectionString);
 
             await connection.ExecuteAsync("CREATE TABLE test (id INT, name TEXT)");
 
@@ -54,12 +53,12 @@ namespace Byndyusoft.Data.Relational.Diagnostics.Tests.Functional
 
             {
                 var first = observer.Events[0];
-                Assert.Equal("System.Data.SQLite.WriteConnectionOpenBefore", first.Key);
+                Assert.Equal(DbDiagnosticListener.EventNames.ConnectionOpening, first.Key);
                 var before = Assert.IsType<ConnectionPayload>(first.Value);
                 Assert.Equal(connection, before.Connection);
 
                 var second = observer.Events[1];
-                Assert.Equal("System.Data.SQLite.WriteConnectionOpenAfter", second.Key);
+                Assert.Equal(DbDiagnosticListener.EventNames.ConnectionOpened, second.Key);
                 var after = Assert.IsType<ConnectionPayload>(second.Value);
                 Assert.Equal(connection, after.Connection);
                 Assert.Equal(before.OperationId, after.OperationId);
@@ -68,15 +67,15 @@ namespace Byndyusoft.Data.Relational.Diagnostics.Tests.Functional
 
             {
                 var third = observer.Events[2];
-                Assert.Equal("System.Data.SQLite.WriteCommandBefore", third.Key);
+                Assert.Equal(DbDiagnosticListener.EventNames.CommandExecuting, third.Key);
                 var before = Assert.IsType<CommandPayload>(third.Value);
-                Assert.Equal(connection.GetId(), before.ConnectionId);
+                Assert.Equal(connection.GetGuid(), before.ConnectionId);
                 Assert.Equal(transaction.GetId(), before.TransactionId);
 
                 var fourth = observer.Events[3];
-                Assert.Equal("System.Data.SQLite.WriteCommandAfter", fourth.Key);
+                Assert.Equal(DbDiagnosticListener.EventNames.CommandExecuted, fourth.Key);
                 var after = Assert.IsType<CommandPayload>(fourth.Value);
-                Assert.Equal(connection.GetId(), before.ConnectionId);
+                Assert.Equal(connection.GetGuid(), before.ConnectionId);
                 Assert.Equal(transaction.GetId(), before.TransactionId);
                 Assert.Equal(before.Command, after.Command);
                 Assert.Equal(before.OperationId, after.OperationId);
@@ -85,14 +84,14 @@ namespace Byndyusoft.Data.Relational.Diagnostics.Tests.Functional
 
             {
                 var fifth = observer.Events[4];
-                Assert.Equal("System.Data.SQLite.WriteTransactionCommitBefore", fifth.Key);
+                Assert.Equal(DbDiagnosticListener.EventNames.TransactionCommitting, fifth.Key);
                 var before = Assert.IsType<TransactionPayload>(fifth.Value);
                 Assert.Equal(connection, before.Connection);
                 Assert.Equal(transaction.GetId(), before.TransactionId);
                 Assert.Equal(isolationLevel, before.IsolationLevel);
 
                 var sixth = observer.Events[5];
-                Assert.Equal("System.Data.SQLite.WriteTransactionCommitAfter", sixth.Key);
+                Assert.Equal(DbDiagnosticListener.EventNames.TransactionCommitted, sixth.Key);
                 var after = Assert.IsType<TransactionPayload>(sixth.Value);
                 Assert.Equal(connection, after.Connection);
                 Assert.Equal(transaction.GetId(), after.TransactionId);
@@ -103,12 +102,12 @@ namespace Byndyusoft.Data.Relational.Diagnostics.Tests.Functional
 
             {
                 var seventh = observer.Events[6];
-                Assert.Equal("System.Data.SQLite.WriteConnectionCloseBefore", seventh.Key);
+                Assert.Equal(DbDiagnosticListener.EventNames.ConnectionClosing, seventh.Key);
                 var before = Assert.IsType<ConnectionPayload>(seventh.Value);
                 Assert.Equal(connection, before.Connection);
 
                 var eighth = observer.Events[7];
-                Assert.Equal("System.Data.SQLite.WriteConnectionCloseAfter", eighth.Key);
+                Assert.Equal(DbDiagnosticListener.EventNames.ConnectionClosed, eighth.Key);
                 var after = Assert.IsType<ConnectionPayload>(eighth.Value);
                 Assert.Equal(connection, after.Connection);
                 Assert.Equal(before.OperationId, after.OperationId);
@@ -126,7 +125,7 @@ namespace Byndyusoft.Data.Relational.Diagnostics.Tests.Functional
 
             void IObserver<DiagnosticListener>.OnNext(DiagnosticListener diagnosticListener)
             {
-                if (diagnosticListener.Name == nameof(DbDiagnosticSource))
+                if (diagnosticListener.Name == nameof(DbDiagnosticListener))
                     _subscriptions.Add(diagnosticListener.Subscribe(this));
             }
 
