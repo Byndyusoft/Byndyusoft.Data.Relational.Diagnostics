@@ -144,12 +144,12 @@ namespace Microsoft.Data.Diagnostics
 
         protected override DbCommand CreateDbCommand()
         {
-            return Inner.CreateCommand().AddDiagnosting();
+            return Inner.CreateCommand()?.AddDiagnosting()!;
         }
 
         protected override DbTransaction BeginDbTransaction(IsolationLevel isolationLevel)
         {
-            return Inner.BeginTransaction(isolationLevel).AddDiagnosting();
+            return Inner.BeginTransaction(isolationLevel)?.AddDiagnosting()!;
         }
 
         protected override void Dispose(bool disposing)
@@ -163,7 +163,7 @@ namespace Microsoft.Data.Diagnostics
         {
             var transaction = await Inner.BeginTransactionAsync(isolationLevel, cancellationToken)
                 .ConfigureAwait(false);
-            return transaction.AddDiagnosting();
+            return transaction?.AddDiagnosting()!;
         }
 
          public override async Task CloseAsync()
