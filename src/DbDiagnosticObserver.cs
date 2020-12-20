@@ -115,7 +115,7 @@ namespace Microsoft.Data.Diagnostics
 
         void IObserver<KeyValuePair<string, object?>>.OnNext(KeyValuePair<string, object?> value)
         {
-            if (OnNext(value.Key, value.Value))
+            if (OnNext(value.Key, value.Value) == false)
                 return;
 
             if (_methods.TryGetValue(value.Key, out var method) == false)

@@ -117,11 +117,11 @@ namespace Byndyusoft.Data.Relational.Diagnostics.Tests.Functional
 
         private sealed class Observer :
             IObserver<DiagnosticListener>,
-            IObserver<KeyValuePair<string, object>>
+            IObserver<KeyValuePair<string, object?>>
         {
             private readonly List<IDisposable> _subscriptions = new List<IDisposable>();
 
-            public readonly List<KeyValuePair<string, object>> Events = new List<KeyValuePair<string, object>>();
+            public readonly List<KeyValuePair<string, object?>> Events = new List<KeyValuePair<string, object?>>();
 
             void IObserver<DiagnosticListener>.OnNext(DiagnosticListener diagnosticListener)
             {
@@ -139,15 +139,15 @@ namespace Byndyusoft.Data.Relational.Diagnostics.Tests.Functional
                 _subscriptions.Clear();
             }
 
-            void IObserver<KeyValuePair<string, object>>.OnCompleted()
+            void IObserver<KeyValuePair<string, object?>>.OnCompleted()
             {
             }
 
-            void IObserver<KeyValuePair<string, object>>.OnError(Exception error)
+            void IObserver<KeyValuePair<string, object?>>.OnError(Exception error)
             {
             }
 
-            void IObserver<KeyValuePair<string, object>>.OnNext(KeyValuePair<string, object> value)
+            void IObserver<KeyValuePair<string, object?>>.OnNext(KeyValuePair<string, object?> value)
             {
                 Events.Add(value);
             }

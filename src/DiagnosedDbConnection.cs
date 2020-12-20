@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Data;
 using System.Data.Common;
 using System.Threading;
@@ -22,13 +21,7 @@ namespace Microsoft.Data.Diagnostics
 
         internal DbConnection Inner { get; }
 
-        public override ISite Site
-        {
-            get => Inner.Site;
-            set => Inner.Site = value;
-        }
-
-        public override string ConnectionString
+        public override string? ConnectionString
         {
             get => Inner.ConnectionString;
             set => Inner.ConnectionString = value;
@@ -38,9 +31,9 @@ namespace Microsoft.Data.Diagnostics
 
         public override ConnectionState State => Inner.State;
 
-        public override string? DataSource => Inner.DataSource;
+        public override string DataSource => Inner.DataSource!;
 
-        public override string? ServerVersion => Inner.ServerVersion;
+        public override string ServerVersion => Inner.ServerVersion!;
 
         public override void Close()
         {
@@ -87,7 +80,7 @@ namespace Microsoft.Data.Diagnostics
             }
         }
 
-        public override void EnlistTransaction(Transaction transaction)
+        public override void EnlistTransaction(Transaction? transaction)
         {
             Inner.EnlistTransaction(transaction);
         }
@@ -102,18 +95,9 @@ namespace Microsoft.Data.Diagnostics
             return Inner.GetSchema(collectionName);
         }
 
-        public override DataTable GetSchema(string collectionName, string[] restrictionValues)
+        public override DataTable GetSchema(string collectionName, string?[] restrictionValues)
         {
             return Inner.GetSchema(collectionName, restrictionValues);
-        }
-
-#if NETCOREAPP
-        public override object InitializeLifetimeService()
-#else
-        public override object? InitializeLifetimeService()
-#endif
-        {
-            return Inner.InitializeLifetimeService();
         }
 
         public override string ToString()
@@ -136,7 +120,7 @@ namespace Microsoft.Data.Diagnostics
             Inner.ChangeDatabase(databaseName);
         }
 
-        public override event StateChangeEventHandler StateChange
+        public override event StateChangeEventHandler? StateChange
         {
             add => Inner.StateChange += value;
             remove => Inner.StateChange -= value;
@@ -158,6 +142,17 @@ namespace Microsoft.Data.Diagnostics
         }
 
 #if ADO_NET_ASYNC
+
+        public override Task ChangeDatabaseAsync(string databaseName, CancellationToken cancellationToken = default)
+        {
+            return Inner.ChangeDatabaseAsync(databaseName, cancellationToken);
+        }
+
+        public override ValueTask DisposeAsync()
+        {
+            return Inner.DisposeAsync();
+        }
+
         protected override async ValueTask<DbTransaction> BeginDbTransactionAsync(IsolationLevel isolationLevel,
             CancellationToken cancellationToken)
         {
@@ -165,8 +160,8 @@ namespace Microsoft.Data.Diagnostics
                 .ConfigureAwait(false);
             return transaction?.AddDiagnosting()!;
         }
-
-         public override async Task CloseAsync()
+        
+        public override async Task CloseAsync()
         {
             var operationId = DiagnosticListenerListener.OnConnectionClosing(this);
             try
@@ -182,5 +177,25 @@ namespace Microsoft.Data.Diagnostics
         }
 
 #endif
+
+#if NET5_0
+
+        public override Task<DataTable> GetSchemaAsync(CancellationToken cancellationToken = default)
+        {
+            return Inner.GetSchemaAsync(cancellationToken);
+        }
+
+        public override Task<DataTable> GetSchemaAsync(string collectionName, CancellationToken cancellationToken = default)
+        {
+            return Inner.GetSchemaAsync(collectionName, cancellationToken);
+        }
+
+        public override Task<DataTable> GetSchemaAsync(string collectionName, string?[] restrictionValues, CancellationToken cancellationToken = default)
+        {
+            return Inner.GetSchemaAsync(collectionName, restrictionValues, cancellationToken);
+        }
+
+#endif
+
     }
 }
